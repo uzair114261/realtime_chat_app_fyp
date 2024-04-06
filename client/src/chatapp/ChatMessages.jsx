@@ -1,13 +1,11 @@
 import React, { useContext, useRef, useState } from 'react'
 import { CameraVideoFill, TelephoneFill, ThreeDotsVertical, ArrowLeft, SendFill, Plus, MicFill, CameraFill, ImageFill, Files, LockFill } from 'react-bootstrap-icons';
-import Image from '../images/Me.jpeg'
 import ReceiverProfile from './ReceiverProfile';
 import useClickOutside from '../CustomHooks/useClickOutside';
 import { ChatStates } from './ChatStates';
 
 const ChatMessages = () => {
-  const { receiverInfo, setReceiverInfo, chatOpen, setChatOpen, selectedUser } = useContext(ChatStates)
-  const [messageSendBtn, setMessageSendBtn] = useState("")
+  const { receiverInfo, setReceiverInfo, chatOpen, setChatOpen, selectedUser, messages, userData } = useContext(ChatStates)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showInputBox, setShowInputBox] = useState(false)
   const dropdownRef = useRef(null)
@@ -15,6 +13,7 @@ const ChatMessages = () => {
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const [file, setFile] = useState([])
+  const [sendTextMessage, setSendTextMessage] = useState("")
 
   const handleChange = e => {
     setFile([...file, e.target.files[0]]);
@@ -25,105 +24,32 @@ const ChatMessages = () => {
   };
   useClickOutside(dropdownRef, handleOutsideClick)
 
-
-  const messages = [
-    {
-      "message": "Hi",
-      "is_send": true,
-      'time': '12:29 AM'
-    },
-    {
-      "message": "Hello",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "how are you",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "do we can make a plan for trip today............................",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "Yeh! for sure",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "Hi",
-      "is_send": true,
-      'time': '12:29 AM'
-    },
-    {
-      "message": "Hello",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "how are you",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "do we can make a plan for trip today............................",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "Yeh! for sure",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "Hi",
-      "is_send": true,
-      'time': '12:29 AM'
-    },
-    {
-      "message": "Hello",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "how are you",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "do we can make a plan for trip today............................",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "Yeh! for sure",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "Hi",
-      "is_send": true,
-      'time': '12:29 AM'
-    },
-    {
-      "message": "Hello",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "how are you",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "do we can make a plan for trip today............................",
-      "is_send": true,
-      'time': '12:29 AM'
-    }, {
-      "message": "do we can make a plan for trip today............................",
-      "is_send": false,
-      'time': '12:29 AM'
-    }, {
-      "message": "Yeah! for sure",
-      "is_send": false,
-      'time': '12:29 AM',
-      'image': Image
-    }, {
-      "message": "Yeah! for sure",
-      "is_send": true,
-      'time': '12:29 AM',
-      'image': Image
+  const sendButton = () => {
+    console.log('message: ', sendTextMessage)
+    setSendTextMessage('')
+  }
+  const handlePressEnter = (event) => {
+    if (event.key === 'Enter') {
+      sendButton();
     }
-  ]
+  }
+  const messageTime = (timeString) => {
+    const timestamp = new Date(timeString)
+    const minutes = timestamp.getMinutes()
+    let hours = timestamp.getHours()
 
+    let amOrPm = 'AM';
+    if (hours >= 12) {
+      amOrPm = 'PM';
+      hours = hours - 12;
+    }
+    return `${hours}:${minutes} ${amOrPm}`
+  }
+
+  const filteredMessages = messages.filter(message =>
+    (message.sender === selectedUser?.id && message.receiver === userData.id) ||
+    (message.sender === userData.id && message.receiver === selectedUser?.id)
+  )
   return (
     <>
       {
@@ -165,24 +91,24 @@ const ChatMessages = () => {
                   </div>
                 </div>
               </div>
-              <div className='max-h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden bg-[#AED8C7]'>
+              <div className='h-cal[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden bg-[#AED8C7]'>
                 <div className="flex flex-col pb-5 md:pb-5">
-                  {messages.map((message, index) => (
-                    <div key={index} className={` flex justify-between py-1 px-2 text-sm rounded mt-3 mx-2 md:mx-4 relative ${message.is_send ? "self-end bg-[#D9FDD3]" : 'self-start bg-[#ffff]'}`}>
+                  {filteredMessages.map((message, index) => (
+                    <div key={index} className={` flex justify-between py-1 px-2 text-sm rounded mt-3 mx-2 md:mx-4 relative ${message.sender === userData.id ? "self-end bg-[#D9FDD3]" : 'self-start bg-[#ffff]'}`}>
                       {message.image ? (
-                        <div className={`max-w-[400px] h-[400px] bg-[${message.is_send ? '#D9FDD3' : '#fff'}]`}>
-                          <img className='w-full h-[380px]' src={message.image} alt="" />
+                        <div className={`max-w-[400px] h-[400px] bg-[${message.sender === userData.id ? '#D9FDD3' : '#fff'}]`}>
+                          <img className='w-full h-[380px]' src={`${process.env.REACT_APP_BACKEND_URL}${message.image}`} alt="" />
                           <div className="flex justify-between items-center h-[20px]">
-                            <div className='max-w-[180px] mt-1'>{message.message}</div>
+                            <div className='max-w-[180px] mt-1'>{message.content}</div>
                             <div className='max-w-[70px] text-gray-500 text-xs flex items-end'>{message.time}</div>
                           </div>
                         </div>
                       ) : (
                         <div className='max-w-[250px] min-w-[220px] flex'>
                           <div className='max-w-[180px] min-w-[150px]'>
-                            {message.message}
+                            {message.content}
                           </div>
-                          <div className='max-w-[70px] min-w-[70px] text-gray-500 text-xs flex justify-end items-end'>{message.time}</div>
+                          <div className='max-w-[70px] min-w-[70px] text-gray-500 text-xs flex justify-end items-end'>{messageTime(message.timestamp)}</div>
                         </div>
                       )}
                     </div>
@@ -228,12 +154,12 @@ const ChatMessages = () => {
                       </div>
                     </div>
                   </div>
-                  <input type="text" onChange={(event) => setMessageSendBtn(event.target.value)} className='grow px-2 py-2 rounded outline-none' placeholder='Type a message' />
+                  <input type="text" value={sendTextMessage} onKeyPress={handlePressEnter} onChange={(event) => setSendTextMessage(event.target.value)} className='grow px-2 py-2 rounded outline-none' placeholder='Type a message' />
                   <div className="send flex-none px-2">
                     <div className="flex">
                       {
-                        messageSendBtn.length > 0 ? (
-                          <button type='submit' className='rotate-45 text-xl h-[30px] w-[30px]'><SendFill size={30} color='#54656f' /></button>
+                        sendTextMessage.length > 0 ? (
+                          <button onClick={sendButton} className='rotate-45 text-xl h-[30px] w-[30px]'><SendFill size={30} color='#54656f' /></button>
                         ) : (
                           <button type='submit' className='text-xl bg-[#008069] h-[30px] w-[30px] flex items-center justify-center rounded-[50%]'><MicFill size={17} color='#fff' /></button>
                         )

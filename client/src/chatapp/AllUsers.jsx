@@ -4,7 +4,7 @@ import { ArrowLeft, Search } from 'react-bootstrap-icons';
 import { ChatStates } from './ChatStates';
 
 function AllUsers() {
-    const {allUsers, setAllUsers, setChatOpen} = useContext(ChatStates)
+    const { allUsers, setAllUsers, setChatOpen } = useContext(ChatStates)
     const [users, setUsers] = useState([]);
     const [searchInput, setSearchInput] = useState('');
     const [loggedInUser, setLoggedInUser] = useState(null);
@@ -26,8 +26,8 @@ function AllUsers() {
 
     const goBack = () => {
         setSearchInput('');
-    setChatOpen(false);
-      };
+        setChatOpen(false);
+    };
 
     const getUserDate = (dateString) => {
         const date = new Date(dateString);
@@ -39,9 +39,9 @@ function AllUsers() {
 
     const filteredUsers = users.filter(user => user.id !== loggedInUser?.id);
     const SearchedUsers = filteredUsers.filter(user => {
-        if(searchInput.trim().length === 0){ 
+        if (searchInput.trim().length === 0) {
             return true;
-        }else{
+        } else {
             return user.email.toLowerCase().includes(searchInput.toLowerCase());
         }
     });
@@ -59,7 +59,7 @@ function AllUsers() {
                         <button className='px-1'>
                             <Search size={16} />
                         </button>
-                        <input type="text" className='' onChange={(e)=>setSearchInput(e.target.value)} value={searchInput} id='search-user-input' placeholder='Search...' />
+                        <input type="text" className='' onChange={(e) => setSearchInput(e.target.value)} value={searchInput} id='search-user-input' placeholder='Search...' />
                     </div>
                 </div>
             </div>

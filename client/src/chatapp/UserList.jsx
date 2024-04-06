@@ -12,7 +12,7 @@ import { ChatStates } from './ChatStates';
 
 const UserList = () => {
     const navigate = useNavigate()
-    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers } = useContext(ChatStates)
+    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers, messages } = useContext(ChatStates)
     const showToast = useContext(ToastContext)
     const [users, setUsers] = useState([]);
     const [loggedInUser, setLoggedInUser] = useState(null);
@@ -114,7 +114,7 @@ const UserList = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>  
                 <div className="search-user-list w-100">
                     <div className='search-user'>
                         <button className='px-1'>
