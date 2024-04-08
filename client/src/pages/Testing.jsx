@@ -1,18 +1,11 @@
-import React, { useRef, useState } from 'react';
-import { Camera } from 'react-bootstrap-icons';
+import React, { useState } from 'react';
 
 const Testing = () => {
-  const [file, setFile] = useState([])
-  const handleChange = e => {
-    setFile([...file, e.taget.files[0]]);
-  }
-  const inputFile = useRef(null)
   return (
-    <div className="container mx-auto]">
-     <button className='flex items-center gap-3' onClick={()=>inputFile.current.click()}>
-      <Camera/> <p>Pictures</p>
-     </button>
-     <input type="file" accept='video/*' onChange={handleChange} ref={inputFile} style={{display: 'none'}} />
+    <div className='bg-black h-screen w-screen py-5'>
+      <div className="h-[400px] w-[400px] bg-white mx-auto relative">
+        <div className="bg-green-700  h-[50px] absolute bottom-0 right-0 left-0 w-full"></div>
+      </div>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import useClickOutside from '../CustomHooks/useClickOutside';
 import { ChatStates } from './ChatStates';
 
 const ChatMessages = () => {
-  const { receiverInfo, setReceiverInfo, chatOpen, setChatOpen, selectedUser, messages, userData } = useContext(ChatStates)
+  const { receiverInfo, setReceiverInfo, chatOpen, setChatOpen, selectedUser, messages, userData, sendTextMessage, setSendTextMessage, sendButton } = useContext(ChatStates)
   const [showDropdown, setShowDropdown] = useState(false)
   const [showInputBox, setShowInputBox] = useState(false)
   const dropdownRef = useRef(null)
@@ -13,7 +13,6 @@ const ChatMessages = () => {
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const [file, setFile] = useState([])
-  const [sendTextMessage, setSendTextMessage] = useState("")
 
   const handleChange = e => {
     setFile([...file, e.target.files[0]]);
@@ -24,10 +23,7 @@ const ChatMessages = () => {
   };
   useClickOutside(dropdownRef, handleOutsideClick)
 
-  const sendButton = () => {
-    console.log('message: ', sendTextMessage)
-    setSendTextMessage('')
-  }
+  
   const handlePressEnter = (event) => {
     if (event.key === 'Enter') {
       sendButton();
@@ -39,9 +35,13 @@ const ChatMessages = () => {
     let hours = timestamp.getHours()
 
     let amOrPm = 'AM';
-    if (hours >= 12) {
+    if (hours === 0) {
+      hours = 12;
+    } else if (hours === 12) {
       amOrPm = 'PM';
-      hours = hours - 12;
+    } else if (hours > 12) {
+      amOrPm = 'PM';
+      hours -= 12;
     }
     return `${hours}:${minutes} ${amOrPm}`
   }
@@ -55,7 +55,7 @@ const ChatMessages = () => {
       {
         selectedUser ? (
           <>
-            <div className={`${receiverInfo ? "md:w-[40%] max-md:hidden" : "md:w-[70%]"} max-h-[100vh] h-[100vh] overflow-auto ${!chatOpen && "max-md:hidden"}`}>
+            <div className={`${receiverInfo ? "md:w-[40%] max-md:hidden" : "md:w-[70%]"} max-h-[100vh] relative  h-[100vh] overflow-auto ${!chatOpen && "max-md:hidden"}`}>
               <div className="flex justify-between items-center bg-[#f0f2f5] h-[60px] px-1 md:px-3">
                 <div className="flex">
                   <button className='mr-1 md:hidden' onClick={() => setChatOpen(false)}><ArrowLeft color='black' className='' /></button>
@@ -91,10 +91,10 @@ const ChatMessages = () => {
                   </div>
                 </div>
               </div>
-              <div className='h-cal[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden bg-[#AED8C7]'>
-                <div className="flex flex-col pb-5 md:pb-5">
+              <div className='h-[calc(100vh-60px)] max-h-[calc(100vh-60px)] overflow-y-auto overflow-x-hidden bg-[#AED8C7] flex flex-col-reverse'>
+                <div className="flex flex-col mb-20">
                   {filteredMessages.map((message, index) => (
-                    <div key={index} className={` flex justify-between py-1 px-2 text-sm rounded mt-3 mx-2 md:mx-4 relative ${message.sender === userData.id ? "self-end bg-[#D9FDD3]" : 'self-start bg-[#ffff]'}`}>
+                    <div key={index} className={` flex justify-between items-end py-1 px-2 text-sm rounded mt-1 mx-2 md:mx-4 relative ${message.sender === userData.id ? "self-end bg-[#D9FDD3]" : 'self-start bg-[#ffff]'}`}>
                       {message.image ? (
                         <div className={`max-w-[400px] h-[400px] bg-[${message.sender === userData.id ? '#D9FDD3' : '#fff'}]`}>
                           <img className='w-full h-[380px]' src={`${process.env.REACT_APP_BACKEND_URL}${message.image}`} alt="" />
@@ -114,7 +114,7 @@ const ChatMessages = () => {
                     </div>
                   ))}
                 </div>
-                <div className='sticky bottom-0 w-full bg-[#f0f2f5] shadow-md px-4 h-[65px] flex items-center'>
+                <div className='absolute bottom-0 w-full bg-[#f0f2f5] shadow-md px-4 h-[65px] flex items-center'>
                   <div className="flex-none">
                     <div className='flex h-[50px] items-center justify-center'>
                       <div className="relative">
