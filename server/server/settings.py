@@ -40,8 +40,10 @@ INSTALLED_APPS = [
     'chat_messages',
     'rest_framework',
     'corsheaders',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'channels'
 ]
+ASGI_APPLICATION = 'server.routing.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
