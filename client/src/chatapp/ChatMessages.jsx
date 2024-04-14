@@ -154,7 +154,7 @@ const ChatMessages = () => {
                       </div>
                     </div>
                   </div>
-                  <input type="text" value={sendTextMessage} onKeyPress={handlePressEnter} onChange={(event) => setSendTextMessage(event.target.value)} className='grow px-2 py-2 rounded outline-none' placeholder='Type a message' />
+                  <input type="text" autoFocus value={sendTextMessage} onKeyPress={handlePressEnter} onChange={(event) => setSendTextMessage(event.target.value)} className='grow px-2 py-2 rounded outline-none' placeholder='Type a message' />
                   <div className="send flex-none px-2">
                     <div className="flex">
                       {

@@ -245,3 +245,19 @@ body{
   justify-content: space-between;
   border-bottom: 1px solid lightgrey;
 }
+
+.spinner {
+  width:20px;
+  height:20px;
+  --c:radial-gradient(farthest-side,#fff 92%,#0000);
+  background: 
+    var(--c) 50% 0,
+    var(--c) 50% 100%,
+    var(--c) 100% 50%,
+    var(--c) 0    50%;
+  background-size:6px 6px;
+  background-repeat:no-repeat;
+  animation:s7 1s infinite;
+}
+
+@keyframes s7 {to{transform: rotate(.5turn)}}

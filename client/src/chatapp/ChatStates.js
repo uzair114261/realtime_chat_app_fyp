@@ -30,7 +30,7 @@ export const ChatStatesProvider = ({ children }) => {
             }
         }
         fetchMessages()
-    }, [])
+    }, [messages])
 
     const sendMessage = async () => {
         try {

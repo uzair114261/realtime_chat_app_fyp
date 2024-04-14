@@ -4,7 +4,7 @@ import { ArrowLeft, Search } from 'react-bootstrap-icons';
 import { ChatStates } from './ChatStates';
 
 function AllUsers() {
-    const { allUsers, setAllUsers, setChatOpen } = useContext(ChatStates)
+    const { allUsers, setAllUsers, setChatOpen, handleUserSelect } = useContext(ChatStates)
     const [users, setUsers] = useState([]);
     const [searchInput, setSearchInput] = useState('');
     const [loggedInUser, setLoggedInUser] = useState(null);
@@ -25,6 +25,7 @@ function AllUsers() {
     }, []);
 
     const goBack = () => {
+        setAllUsers(false)
         setSearchInput('');
         setChatOpen(false);
     };
@@ -45,12 +46,15 @@ function AllUsers() {
             return user.email.toLowerCase().includes(searchInput.toLowerCase());
         }
     });
-
+    const handleUserClick = (user) => {
+        setChatOpen(true)
+        handleUserSelect(user);
+    }
     return (
         <div className={`${allUsers ? "md:w-[30%] max-h-[100vh] h-[100vh] overflow-auto" : "hidden"}`}>
             <div className="bg-[#008069] h-[60px] flex justify-start items-center px-3">
-                <button onClick={() => setAllUsers(false)} className='text-white text-xl'><ArrowLeft /></button>
-                <h3 className='ml-4 text-white text-xl'>All Users</h3>
+                <button onClick={goBack} className='text-white text-xl'><ArrowLeft /></button>
+                <h3 className='ml-4 text-white text-xl'>Search your friend to chat with</h3>
             </div>
             <div className="max-h-[calc(100vh-60px)] bg-[#f0f2f5] overflow-y-auto overflow-x-hidden ">
 
@@ -64,9 +68,16 @@ function AllUsers() {
                 </div>
             </div>
             {
+            searchInput.trim().length === 0 ? (
+                <div className='flex items-center justify-center h-[calc(100vh-200px)]'>
+                    <div className="p-5 rounded-lg bg-slate-300 w-[80%] text-center">
+                        <h1>Search for your friend</h1>
+                    </div>
+                </div>
+            ):
                 SearchedUsers.length > 0 ? (
                     SearchedUsers.map((user, index) => (
-                        <div key={index} className='each-user' onClick={goBack}>
+                        <div key={index} className='each-user' onClick={() => handleUserClick(user)}>
                             <div className="image">
                                 <img src={`${process.env.REACT_APP_BACKEND_URL}${user.profileImage}`} className='avatar ' alt="" />
                             </div>

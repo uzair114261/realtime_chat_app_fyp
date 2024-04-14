@@ -23,7 +23,7 @@ const UserList = () => {
     const isOnline = useOnlineStatus();
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
     const dropdownRef = useRef(null);
-    
+
     const handleOutsideClick = () => {
         setShowDropdown(false)
     }
@@ -65,13 +65,63 @@ const UserList = () => {
         return new Intl.DateTimeFormat('en-US', options).format(date);
     };
     const filteredUsers = users.filter(user => user.id !== loggedInUser?.id);
-    const SearchedUsers = filteredUsers.filter(user => {
+
+    const usersWithMessages = filteredUsers.filter(user => {
+        return messages.some(message => {
+            return (message.sender === user.id && message.receiver === loggedInUser?.id) ||
+                (message.sender === loggedInUser?.id && message.receiver === user.id);
+        });
+    });
+
+    const highlightMatchedText = (text, searchInput) => {
+        if (!searchInput.trim()) {
+            return text;
+        }
+        const escapedInput = searchInput.replace(/[-\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(`(${escapedInput.replace(/\s/g, '|')})`, 'gi');
+        const parts = text.split(regex);
+        return (
+            <>
+                {parts.map((part, index) => {
+                    return part.match(regex) ? <span key={index} style={{ backgroundColor: 'yellow' }}>{part}</span> : part;
+                })}
+            </>
+        );
+    };
+    const getLastMessage = (userId) => {
+        const userMessages = messages.filter(message =>
+            (message.sender === userId && message.receiver === loggedInUser?.id) ||
+            (message.sender === loggedInUser?.id && message.receiver === userId)
+        );
+        if (userMessages.length > 0) {
+            const lastMessage = userMessages[userMessages.length - 1];
+            return lastMessage.content;
+        } else {
+            return "";
+        }
+    };
+    const getLastMessageTimestamp = (userId) => {
+        const userMessages = messages.filter(message => message.sender === userId || message.receiver === userId);
+        if (userMessages.length > 0) {
+            const lastMessage = userMessages[userMessages.length - 1];
+            return new Date(lastMessage.timestamp).getTime()
+        } else {
+            return 0
+        }
+    };
+    const SearchedUsers = usersWithMessages.filter(user => {
         if (searchInput.trim().length === 0) {
             return true;
         } else {
             const name = `${user.firstName} ${user.lastName}`;
             return name.toLowerCase().includes(searchInput.toLowerCase());
         }
+    })
+    console.log(usersWithMessages)
+    const sortedUsers = SearchedUsers.sort((userA, userB) => {
+        const timestampA = getLastMessageTimestamp(userA.id);
+        const timestampB = getLastMessageTimestamp(userB.id);
+        return timestampB - timestampA
     });
     const handleUserClick = (user) => {
         setChatOpen(true)
@@ -80,7 +130,7 @@ const UserList = () => {
     return (
         <>
             <SenderProfile />
-            <AllUsers  />
+            <AllUsers />
             <div className={`md:w-[30%] max-h-[100vh] h-[100vh] overflow-auto ${chatOpen && 'max-md:hidden'} ${senderProfile && 'hidden'} ${allUsers && 'hidden'}`}>
                 <div className="flex h-[60px] justify-between items-center px-3 bg-[#f0f2f5] border-r-[1px] border-[#d1d7db]">
                     <div className="profile-image cursor-pointer" onClick={() => setSenderProfile(true)}>
@@ -114,7 +164,7 @@ const UserList = () => {
                             </div>
                         </div>
                     </div>
-                </div>  
+                </div>
                 <div className="search-user-list w-100">
                     <div className='search-user'>
                         <button className='px-1'>
@@ -138,19 +188,22 @@ const UserList = () => {
                         </div>
                     </div>}
                     {
-                        SearchedUsers.length > 0 ? (
-                            SearchedUsers.map((user, index) => (
+                        sortedUsers.length > 0 ? (
+                            sortedUsers.map((user, index) => (
                                 <div key={index} className='each-user' onClick={() => handleUserClick(user)}>
                                     <div className="image">
                                         <img src={`${process.env.REACT_APP_BACKEND_URL}${user.profileImage}`} className='avatar object-cover' alt="" />
                                     </div>
                                     <div className='user-list-data pl-3 pr-2 md:pl-5'>
                                         <div className='user-info'>
-                                            <div className='user-name'>{user.firstName} {user.lastName}</div>
+                                            <div className='user-name'>
+                                                {highlightMatchedText(user.firstName, searchInput)} {highlightMatchedText(user.lastName, searchInput)}
+                                            </div>
                                             <div className='last-msg-time'>{getUserDayName(user.created_at)}</div>
                                         </div>
                                         <div className="user-last-msg">
-                                            <p>message</p>
+                                            <p>{getLastMessage(user.id)}</p>
+
                                         </div>
                                     </div>
                                 </div>
@@ -192,7 +245,6 @@ const UserList = () => {
                     </div>
                 )
             }
-
         </>
     )
 }
