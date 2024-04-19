@@ -59,8 +59,8 @@ const Login = () => {
         setShowPassword(!showPassword);
     }
     return (
-        <div className='h-screen flex items-center justify-center bg-slate-50'>
-            <form action="" className='shadow shadow-slate-600 ease-linear duration-200 bg-slate-100  p-4 rounded lg:w-3/12 max-w-80' onSubmit={handleSubmit}>
+        <div className='h-screen flex items-center justify-center bg-slate-100'>
+            <form action="" className='sm:w-[350px]  shadow shadow-slate-600 ease-linear duration-200 bg-white  p-4 rounded' onSubmit={handleSubmit}>
                 <div className="text-center">
                     <h2 className='text-2xl font-semibold'>Realtime Chat Application</h2>
                     <div className='text-xl flex justify-center py-3'><p className='mr-2'>Enter Credentials</p> <LockFill className='lock-icon' size={30} /></div>

@@ -51,33 +51,33 @@ function AllUsers() {
         handleUserSelect(user);
     }
     return (
-        <div className={`${allUsers ? "md:w-[30%] max-h-[100vh] h-[100vh] overflow-auto" : "hidden"}`}>
-            <div className="bg-[#008069] h-[60px] flex justify-start items-center px-3">
+        <div className={`${allUsers ? "md:w-[30%] max-h-[100vh] h-[100vh] dark:border-r-[1px] dark:border-r-white dark:bg-slate-900 overflow-auto" : "hidden"}`}>
+            <div className="bg-[#008069] dark:bg-slate-900  h-[60px] flex justify-start items-center px-3">
                 <button onClick={goBack} className='text-white text-xl'><ArrowLeft /></button>
                 <h3 className='ml-4 text-white text-xl'>Search your friend to chat with</h3>
             </div>
-            <div className="max-h-[calc(100vh-60px)] bg-[#f0f2f5] overflow-y-auto overflow-x-hidden ">
+            <div className="max-h-[calc(100vh-60px)] bg-[#f0f2f5] dark:bg-slate-800 overflow-y-auto overflow-x-hidden ">
 
-                <div className="search-user-list w-100">
-                    <div className='search-user'>
+                <div className="search-user-list w-100 dark:bg-slate-800">
+                    <div className='search-user dark:bg-slate-700'>
                         <button className='px-1'>
-                            <Search size={16} />
+                            <Search size={16} className='dark:text-white' />
                         </button>
-                        <input type="text" className='' onChange={(e) => setSearchInput(e.target.value)} value={searchInput} id='search-user-input' placeholder='Search...' />
+                        <input type="text" className='dark:bg-slate-700 dark:text-white' onChange={(e) => setSearchInput(e.target.value)} value={searchInput} id='search-user-input' placeholder='Search...' />
                     </div>
                 </div>
             </div>
             {
             searchInput.trim().length === 0 ? (
-                <div className='flex items-center justify-center h-[calc(100vh-200px)]'>
-                    <div className="p-5 rounded-lg bg-slate-300 w-[80%] text-center">
+                <div className='flex items-center justify-center h-[calc(100vh-115px)]'>
+                    <div className="p-5 rounded-lg bg-slate-300 dark:bg-white w-[80%] text-center">
                         <h1>Search for your friend</h1>
                     </div>
                 </div>
             ):
                 SearchedUsers.length > 0 ? (
                     SearchedUsers.map((user, index) => (
-                        <div key={index} className='each-user' onClick={() => handleUserClick(user)}>
+                        <div key={index} className='each-user dark:bg-slate-800 dark:hover:bg-[#2A3942]' onClick={() => handleUserClick(user)}>
                             <div className="image">
                                 <img src={`${process.env.REACT_APP_BACKEND_URL}${user.profileImage}`} className='avatar ' alt="" />
                             </div>
@@ -94,8 +94,8 @@ function AllUsers() {
                     ))
 
                 ) : (
-                    <div className='flex items-center justify-center h-[calc(100vh-200px)]'>
-                        <div className="p-5 rounded-lg bg-slate-300 w-[80%] text-center">
+                    <div className='flex items-center justify-center h-[calc(100vh-115px)]'>
+                        <div className="p-5 rounded-lg bg-slate-300 dark:bg-white w-[80%] text-center">
                             <h1>You friend is not found. Please enter correct email address</h1>
                         </div>
                     </div>

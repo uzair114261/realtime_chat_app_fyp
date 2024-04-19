@@ -2,12 +2,13 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useOnlineStatus } from '../CustomHooks/useOnlineStatus';
 import axios from 'axios';
 import AllUsers from './AllUsers';
-import { ThreeDotsVertical, HouseAddFill, MoonFill, Search, WifiOff } from 'react-bootstrap-icons'
+import { ThreeDotsVertical, HouseAddFill, Search, WifiOff } from 'react-bootstrap-icons'
 import SenderProfile from './SenderProfile';
 import useClickOutside from '../CustomHooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { ToastContext } from '../App';
 import { ChatStates } from './ChatStates';
+import DarkModeToggle from '../CustomHooks/DarkModeToggle';
 
 
 const UserList = () => {
@@ -83,7 +84,7 @@ const UserList = () => {
         return (
             <>
                 {parts.map((part, index) => {
-                    return part.match(regex) ? <span key={index} style={{ backgroundColor: 'yellow' }}>{part}</span> : part;
+                    return part.match(regex) ? <span key={index} className='bg-yellow-500 dark:bg-white dark:text-black'>{part}</span> : part;
                 })}
             </>
         );
@@ -117,7 +118,6 @@ const UserList = () => {
             return name.toLowerCase().includes(searchInput.toLowerCase());
         }
     })
-    console.log(usersWithMessages)
     const sortedUsers = SearchedUsers.sort((userA, userB) => {
         const timestampA = getLastMessageTimestamp(userA.id);
         const timestampB = getLastMessageTimestamp(userB.id);
@@ -131,30 +131,30 @@ const UserList = () => {
         <>
             <SenderProfile />
             <AllUsers />
-            <div className={`md:w-[30%] max-h-[100vh] h-[100vh] overflow-auto ${chatOpen && 'max-md:hidden'} ${senderProfile && 'hidden'} ${allUsers && 'hidden'}`}>
-                <div className="flex h-[60px] justify-between items-center px-3 bg-[#f0f2f5] border-r-[1px] border-[#d1d7db]">
+            <div className={`md:w-[30%] max-h-[100vh] h-[100vh] sm:dark:border-r-[1px] dark:border-r-white dark:bg-slate-900 overflow-auto ${chatOpen && 'max-md:hidden'} ${senderProfile && 'hidden'} ${allUsers && 'hidden'}`}>
+                <div className="flex h-[60px] justify-between items-center px-3 dark:bg-slate-900 bg-[#f0f2f5]  border-r-[#d1d7db] border-solid border-r-[1px] dark:border-none">
                     <div className="profile-image cursor-pointer" onClick={() => setSenderProfile(true)}>
                         <img src={`${process.env.REACT_APP_BACKEND_URL}${userData.profileImage}`} alt="My Profile" className='avatar' />
                     </div>
                     <div className="user-features flex">
                         <div className='mx-2'>
-                            <MoonFill color='#54656f' size={20} />
+                            <DarkModeToggle />
                         </div>
                         <div className='mx-2' onClick={() => setAllUsers(true)}>
-                            <HouseAddFill color='#54656f' size={20} />
+                            <HouseAddFill className='text-[#54656f] dark:text-white' size={20} />
                         </div>
                         <div className="">
                             <div ref={dropdownRef} className="relative inline-block text-left">
                                 <div>
                                     <button onClick={() => setShowDropdown(true)} type="button" className=" " id="menu-button" aria-expanded="true" aria-haspopup="true">
-                                        <ThreeDotsVertical size={23} />
+                                        <ThreeDotsVertical className='text-[#54656f] dark:text-white' size={23} />
                                     </button>
                                 </div>
                                 {
                                     showDropdown && (
-                                        <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                                        <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-slate-800" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
                                             <div className="py-1" role="none">
-                                                <li className="hover:bg-gray-100 ease-linear duration-150 text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" onClick={showPopup}>Logout</li>
+                                                <li className="hover:bg-gray-100 cursor-pointer dark:hover:bg-transparent dark:text-white ease-linear duration-150 text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-item-0" onClick={showPopup}>Logout</li>
 
                                             </div>
                                         </div>
@@ -165,17 +165,16 @@ const UserList = () => {
                         </div>
                     </div>
                 </div>
-                <div className="search-user-list w-100">
-                    <div className='search-user'>
+                <div className="search-user-list w-100 dark:bg-slate-800">
+                    <div className='search-user dark:bg-slate-700'>
                         <button className='px-1'>
-                            <Search size={16} />
+                            <Search size={16} className='dark:text-white' />
                         </button>
-                        <input type="text" onChange={(e) => setSearchInput(e.target.value)} value={searchInput} id='search-user-input' placeholder='Search...' />
-
+                        <input  onChange={(e) => setSearchInput(e.target.value)} value={searchInput} id='search-user-input' className='dark:bg-slate-700 dark:text-white' placeholder='Search...' />
                     </div>
                 </div>
 
-                <div className="real-user-list">
+                <div className="real-user-list dark:bg-slate-800">
                     {!isOnline && <div className="offline-connection-msg">
                         <div className="wifi-icon">
                             <div className="wifi-off">
@@ -190,19 +189,19 @@ const UserList = () => {
                     {
                         sortedUsers.length > 0 ? (
                             sortedUsers.map((user, index) => (
-                                <div key={index} className='each-user' onClick={() => handleUserClick(user)}>
+                                <div key={index} className='each-user dark:bg-slate-800 dark:hover:bg-[#2A3942]' onClick={() => handleUserClick(user)}>
                                     <div className="image">
                                         <img src={`${process.env.REACT_APP_BACKEND_URL}${user.profileImage}`} className='avatar object-cover' alt="" />
                                     </div>
                                     <div className='user-list-data pl-3 pr-2 md:pl-5'>
-                                        <div className='user-info'>
+                                        <div className='user-info dark:text-white'>
                                             <div className='user-name'>
                                                 {highlightMatchedText(user.firstName, searchInput)} {highlightMatchedText(user.lastName, searchInput)}
                                             </div>
-                                            <div className='last-msg-time'>{getUserDayName(user.created_at)}</div>
+                                            <div className='last-msg-time '><p className='dark:text-white'>{getUserDayName(user.created_at)}</p></div>
                                         </div>
-                                        <div className="user-last-msg">
-                                            <p>{getLastMessage(user.id)}</p>
+                                        <div className="user-last-msg dark:text-white">
+                                            <p>{getLastMessage(user.id).length > 40 ? getLastMessage(user.id).substring(0,40)+'...': getLastMessage(user.id)}</p>
 
                                         </div>
                                     </div>
@@ -229,13 +228,13 @@ const UserList = () => {
                             <p className="mb-4">Are you sure you want to Logout?</p>
                             <div className="flex justify-end">
                                 <button
-                                    className="px-4 py-2 mr-4 bg-gray-300 ease-linear duration-200 text-gray-700 rounded hover:bg-gray-400"
+                                    className="px-4 py-2 mr-4 bg-gray-300 ease-linear duration-200 text-gray-700 dark:bg-white rounded hover:bg-gray-400"
                                     onClick={() => setShowLogoutPopup(false)}
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    className="px-4 py-2 bg-slate-600 ease-linear duration-200 text-white rounded hover:bg-slate-700"
+                                    className="px-4 py-2 bg-slate-600 ease-linear duration-200 dark:bg-slate-900 text-white rounded hover:bg-slate-700"
                                     onClick={logoutHandler}
                                 >
                                     Logout
