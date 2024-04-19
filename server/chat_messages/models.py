@@ -6,7 +6,7 @@ class Message(models.Model):
     sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='message_sender')
     receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='message_receiver')
     content = models.TextField(blank=True)
-    content_type = models.CharField(max_length=255, choices=[('text', 'Text'), ('image', 'Image'), ('video', 'Video'), ('file', 'File'), ('audio', 'Audio')], default='text')
+    content_type = models.CharField(max_length=255, default='text')
     file = models.FileField(upload_to='messages/', blank=True, null=True)
     image = models.ImageField(upload_to='messages/', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)

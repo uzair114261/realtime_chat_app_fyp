@@ -1,12 +1,19 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useMemo } from 'react'
 import UserList from './UserList'
 import ChatMessages from './ChatMessages'
 import { useNavigate } from 'react-router'
 import { ToastContext } from '../App'
 import { ChatStates } from './ChatStates'
+import { useSocket } from '../provider/SocketProvider'
 
 const ChatApp = () => {
+  
   const {userData} =  useContext(ChatStates)
+  const socket = useSocket();
+  useMemo(() => {
+    
+    socket.emit("join:email" , userData.email);
+  } , [socket ])
   const showToast = useContext(ToastContext)
   // const [selectedUser, setSelectedUser] = useState(null);
   const navigate = useNavigate()
@@ -28,6 +35,7 @@ const ChatApp = () => {
     navigate('/')
     return null
   }
+  
   return (
     <div className='flex max-md:flex-col'>
       <UserList  />

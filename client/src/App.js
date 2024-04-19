@@ -8,12 +8,16 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ChatApp from "./chatapp/ChatApp";
 import { ChatStatesProvider } from "./chatapp/ChatStates";
+import { SocketProvider } from "./provider/SocketProvider";
 
 export const ToastContext = createContext();
 
 function App() {
   return (
     <div className="">
+      <SocketProvider>
+
+  
       <ToastContainer />
       <ToastContext.Provider value={toast}>
         <ChatStatesProvider>
@@ -27,6 +31,7 @@ function App() {
           </Router>
         </ChatStatesProvider>
       </ToastContext.Provider>
+      </SocketProvider>
     </div>
   );
 }
