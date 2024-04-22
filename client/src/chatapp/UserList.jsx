@@ -13,9 +13,9 @@ import DarkModeToggle from '../CustomHooks/DarkModeToggle';
 
 const UserList = () => {
     const navigate = useNavigate()
-    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers, messages } = useContext(ChatStates)
+    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers, messages ,users , setUsers} = useContext(ChatStates)
     const showToast = useContext(ToastContext)
-    const [users, setUsers] = useState([]);
+  
     const [loggedInUser, setLoggedInUser] = useState(null);
     const [searchInput, setSearchInput] = useState('');
     const [showDropdown, setShowDropdown] = useState(false)

@@ -32,6 +32,11 @@ const ChatMessages = () => {
     sendButton,
     setFile,
     file,
+    setAudioCall,
+    setVideoCall,
+    setCallAccepted,
+    genrateAudioCall,
+    genrateVideoCall
   } = useContext(ChatStates);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInputBox, setShowInputBox] = useState(false);
@@ -119,13 +124,21 @@ const ChatMessages = () => {
                 </div>
               </div>
               <div className="flex gap-5 items-center">
-                <button className="" id="audioCall">
+                <button className="" id="audioCall" onClick={() => {
+                  genrateAudioCall();
+                  setAudioCall(true);
+                  setCallAccepted(true);
+                }}>
                   <TelephoneFill
                     className="text-[#54656f] dark:text-white"
                     size={20}
                   />
                 </button>
-                <button className="" id="videoCall">
+                <button className="" id="videoCall" onClick={() => {
+                    genrateVideoCall();
+                  setVideoCall(true);
+                  setCallAccepted(true);
+                }}>
                   <CameraVideoFill
                     className="text-[#54656f] dark:text-white"
                     size={20}

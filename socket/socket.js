@@ -26,24 +26,15 @@ io.on("connection", (socket) => {
         console.log(receiverId)
         io.to(receiverId).emit("message:receive", data);
     })
-    socket.on("user:call:room", (callId) => {
-        socket.join(callId)
-    });
+    socket.on("call:incoming", (data) => {
+        const { from, to, callType } = data;
+        const callTo = sessionsMap[to];
 
-    socket.on("call:cancelled", ({ from, data }) => {
-        io.to(from).emit("call:cancelled", data);
-    });
-    socket.on("call:incoming", ({ from, data }) => {
-        //@ts-ignore
-        io.to(from).emit("call:incoming", data);
-        io.to(socket.id).emit("call:incoming:complete");
-    });
+        io.to(callTo).emit("call:incoming", data);
+    })
 
-    socket.on("user:call:accepted", ({ callId, data }) => {
-        //@ts-ignore
-        io.to(callId).emit("user:call:accepted", data);
-        io.to(socket.id).emit("user:call:accepted:complete");
-    });
+
+
 
 
 
@@ -83,12 +74,14 @@ io.on("connection", (socket) => {
 
 
     socket.on("user:call", ({ to, offer }) => {
+
         io.to(to).emit("incomming:call", { from: socket.id, offer });
     });
 
     socket.on("call:accepted", ({ to, ans }) => {
         io.to(to).emit("call:accepted", { from: socket.id, ans });
     });
+
 
     socket.on("peer:nego:needed", ({ to, offer }) => {
         io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
@@ -98,10 +91,13 @@ io.on("connection", (socket) => {
         io.to(to).emit("peer:nego:final", { from: socket.id, ans });
     });
 
-    socket.on("call:end", async({ room }) => {
+    socket.on("call:end", async({ room, to }) => {
+
+        const callTo = sessionsMap[to];
+
+        io.to(callTo).emit("call:cancelled");
 
         const sockets = await io.in(room).fetchSockets();
-        io.to(room).emit("call:cancelled");
         sockets.forEach((s) => {
             s.leave(room);
         });

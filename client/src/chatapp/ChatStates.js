@@ -1,4 +1,4 @@
-import { useState, createContext, useEffect } from "react";
+import { useState, createContext, useEffect, useMemo, useCallback } from "react";
 import { useSocket } from "../provider/SocketProvider";
 
 export const ChatStates = createContext();
@@ -10,10 +10,15 @@ export const ChatStatesProvider = ({ children }) => {
   const userData = JSON.parse(localStorage.getItem("userData"));
   const [chatOpen, setChatOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState([]);
   const [senderProfile, setSenderProfile] = useState(false);
   const [allUsers, setAllUsers] = useState(false);
   const [sendTextMessage, setSendTextMessage] = useState("");
   const [file, setFile] = useState([]);
+  const [audioCall , setAudioCall] = useState(false);
+  const [videoCall , setVideoCall] = useState(false);
+  const [callAccepted , setCallAccepted] = useState(false);
+  const [incomingCall , setIncomingCall] = useState(false);
   const handleUserSelect = (user) => {
     setSelectedUser(user);
   };
@@ -134,7 +139,57 @@ export const ChatStatesProvider = ({ children }) => {
       console.error("Error in sending the message:", error);
     }
   };
+  useMemo(() => {
+    if(callAccepted){
+     
+      
+    }
+    else {
+      
+      setAudioCall(false);
+      setVideoCall(false);
+    }
+  } , [callAccepted]);
+  const genrateVideoCall = async () => {
+    socket.emit("room:join" , {email : userData?.email , room : userData?.email});
+    socket.emit("call:incoming" , {from : userData?.email , to : selectedUser?.email , callType : "video"});
 
+  };
+  const genrateAudioCall = async () => {
+
+  };
+  const acceptCall = async () => {
+    setCallAccepted(true);
+    socket.emit("room:join" , {email : userData?.email , room : selectedUser?.email})
+  }
+  socket.on("call:cancelled", () => {
+    setCallAccepted(false);
+    setVideoCall(false);
+    setAudioCall(false);
+  });
+  const callEnd =useCallback( async (to) => {
+      if(incomingCall){
+        
+        socket.emit("call:end" , { room : selectedUser?.email , to : to})
+      } else {
+       
+        socket.emit("call:end" , { room : userData?.email ,  to : to})
+      }
+      setCallAccepted(false);
+      setVideoCall(false);
+      setAudioCall(false);
+  } , [incomingCall])
+  socket.on("call:incoming" , async (data) => {
+    const {from , to , callType} = data;
+    setIncomingCall(true);
+    if(callType == "video"){
+      const user = users.filter((singleUser) => singleUser.email == from)?.[0];
+      if(user){
+        handleUserSelect(user);
+      }
+      setVideoCall(true);
+    } 
+  })
   const contextValue = {
     receiverInfo,
     setReceiverInfo,
@@ -153,6 +208,19 @@ export const ChatStatesProvider = ({ children }) => {
     sendButton,
     setFile,
     file,
+    setAudioCall,
+    audioCall,
+    setVideoCall,
+    videoCall,
+    setCallAccepted,
+    callAccepted,
+    genrateVideoCall,
+    genrateAudioCall,
+    users,
+    setUsers,
+    acceptCall,
+    incomingCall,
+    callEnd
   };
   return (
     <ChatStates.Provider value={contextValue}>{children}</ChatStates.Provider>
