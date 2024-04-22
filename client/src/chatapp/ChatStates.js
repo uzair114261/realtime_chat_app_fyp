@@ -41,42 +41,10 @@ export const ChatStatesProvider = ({ children }) => {
     setMessages([...messages, message]);
   });
   const sendMessage = async () => {
-    let response;
+    
     try {
       const sender = userData.id;
       const receiver = selectedUser?.id;
-      const formData = new FormData();
-      if (file.length > 0) {
-        for (var indexFile = 0; indexFile < file.length; indexFile++) {
-          formData.append("sender", sender);
-          formData.append("receiver", receiver);
-          formData.append("content", sendTextMessage);
-
-          formData.append("file", file[indexFile]);
-          formData.append("content_type", file[indexFile].type);
-          response = await fetch(
-            `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
-            {
-              method: "POST",
-              body: formData, // Send the FormData directly, no need for JSON.stringify
-            }
-          );
-        }
-      } else {
-        formData.append("sender", sender);
-        formData.append("receiver", receiver);
-        formData.append("content", sendTextMessage);
-
-        formData.append("file", file[0]);
-        formData.append("content_type", file[0].type);
-        response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
-          {
-            method: "POST",
-            body: formData, // Send the FormData directly, no need for JSON.stringify
-          }
-        );
-      }
       setMessages([
         ...messages,
         {
@@ -90,21 +58,77 @@ export const ChatStatesProvider = ({ children }) => {
           timestamp: new Date(),
         },
       ]);
+      if (file.length > 0) {
+        let messagesnew = messages;
+        for (var indexFile = 0; indexFile < file.length; indexFile++) {
+          const formData = new FormData();
+          formData.append("sender", sender);
+          formData.append("receiver", receiver);
+          formData.append("content", sendTextMessage);
 
-      if (!response.ok) {
-        setMessages(messages.filter((item) => item.id != -1));
-        throw new Error("Failed to send message");
+          formData.append("file", file[indexFile]);
+          formData.append("content_type", file[indexFile].type);
+          const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
+            {
+              method: "POST",
+              body: formData, // Send the FormData directly, no need for JSON.stringify
+            }
+          );
+          if (!response.ok) {
+            setMessages(messages.filter((item) => item.id != -1));
+            throw new Error("Failed to send message");
+          }
+          if(response.ok){
+            
+            setMessages(messages.filter((item) => item.id != -1));
+            const responseJson = await response.json();
+            messagesnew.push(responseJson);
+            socket.emit("message:send", {
+              receiver: selectedUser?.email,
+              sender: userData.email,
+              message: responseJson,
+            });
+            
+          }
+        }
+        
+        setMessages( messagesnew);
+      } else {
+        const formData = new FormData();
+        formData.append("sender", sender);
+        formData.append("receiver", receiver);
+        formData.append("content", sendTextMessage);
+
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
+          {
+            method: "POST",
+            body: formData, // Send the FormData directly, no need for JSON.stringify
+          }
+        );
+        
+        if (!response.ok) {
+          setMessages(messages.filter((item) => item.id != -1));
+          throw new Error("Failed to send message");
+        }
+        if(response.ok){
+          
+          setMessages(messages.filter((item) => item.id != -1));
+          const responseJson = await response.json();
+          
+          setMessages([...messages, responseJson]);
+          socket.emit("message:send", {
+            receiver: selectedUser?.email,
+            sender: userData.email,
+            message: responseJson,
+          });
+        }
       }
-      if (response.ok) {
-        setMessages(messages.filter((item) => item.id != -1));
-        const responseJson = await response.json();
-        setMessages([...messages, responseJson]);
-        socket.emit("message:send", {
-          receiver: selectedUser?.email,
-          sender: userData.email,
-          message: responseJson,
-        });
-      }
+      
+
+    
+      
       setFile([]);
     } catch (error) {
       console.error("Error in sending the message:", error);

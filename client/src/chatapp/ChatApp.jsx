@@ -12,7 +12,9 @@ const ChatApp = () => {
   const socket = useSocket();
   useMemo(() => {
     
-    socket.emit("join:email" , userData.email);
+    if(userData?.email){
+      socket.emit("join:email" , userData?.email);
+    }
   } , [socket ])
   const showToast = useContext(ToastContext)
   // const [selectedUser, setSelectedUser] = useState(null);

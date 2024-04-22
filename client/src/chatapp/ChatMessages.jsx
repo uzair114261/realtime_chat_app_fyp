@@ -240,7 +240,8 @@ const ChatMessages = () => {
                         ) : (
                           <>
                             {!message.content_type.includes("image") &&
-                            !message.content_type.includes("video") ? (
+                            !message.content_type.includes("video") && !message.content_type.includes("text") ? (
+                              <>
                               <a
                                 target="_blank"
                                 href={`${process.env.REACT_APP_BACKEND_URL}${message.file}`}
@@ -253,10 +254,18 @@ const ChatMessages = () => {
                                     ""
                                   )}
                                 </div>
-                              </a>
+                              </a> <div className="flex justify-between items-center h-[20px]">
+                              <div className="max-w-[180px] mt-1">
+                                {message.content}
+                              </div>
+                              <div className="max-w-[70px] text-gray-500 text-[10px] flex items-end">
+                                {message.time}
+                              </div>
+                            </div>
+                              </>
                             ) : (
                               <div className="max-w-[250px] min-w-[220px] flex">
-                                <div className="max-w-[180px] min-w-[150px] dark:text-white">
+                                <div className="max-w-[180px] min-w-[150px] dark:text-white ">
                                   {message.content}
                                 </div>
                                 <div className="max-w-[70px] min-w-[70px] text-gray-500 text-xs flex justify-end items-end dark:text-white">
