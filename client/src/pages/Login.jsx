@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false)
     const [loginData, setLoginData] = useState({
         email: '',
         password: ''
@@ -22,6 +23,7 @@ const Login = () => {
             return;
         }
         try {
+            setLoading(true)
             const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}users/api/login`, loginData)
             const { access, refresh, user } = response.data;
             localStorage.clear()
@@ -31,6 +33,7 @@ const Login = () => {
             showToast.success('Login Successfully', {
                 autoClose: 3000
             })
+            setLoading(false)
             navigate('/')
         } catch (err) {
             if (err.response) {
@@ -77,7 +80,9 @@ const Login = () => {
                     }</button>
                     <label htmlFor="password" className='floating-label'>Password</label>
                 </div>
-                <input type="submit" value="Login" className='w-full p-1 mb-3 rounded text-white cursor-pointer bg-blue-500 hover:bg-blue-700 ease-linear duration-200 text-center' />
+                <button type='submit' className='w-full p-1 flex items-center justify-center gap-3 mb-3 rounded text-white cursor-pointer bg-blue-500 hover:bg-blue-700 ease-linear duration-200 text-center'>
+                    {loading ? <div className='spinner'></div> : <div>Login</div>}
+                </button>
                 <div className='flex justify-end items-center'>
                     <Link className='text-blue-800' to="/register">Create an account</Link>
                 </div>

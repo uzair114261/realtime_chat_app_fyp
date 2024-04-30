@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useOnlineStatus } from '../CustomHooks/useOnlineStatus';
 import axios from 'axios';
 import AllUsers from './AllUsers';
-import { ThreeDotsVertical, HouseAddFill, Search, WifiOff } from 'react-bootstrap-icons'
+import { ThreeDotsVertical, PersonBadgeFill, Search, WifiOff, PersonExclamation, PersonGear, PersonCheck } from 'react-bootstrap-icons'
 import SenderProfile from './SenderProfile';
 import useClickOutside from '../CustomHooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
@@ -141,7 +141,7 @@ const UserList = () => {
                             <DarkModeToggle />
                         </div>
                         <div className='mx-2' onClick={() => setAllUsers(true)}>
-                            <HouseAddFill className='text-[#54656f] dark:text-white' size={20} />
+                            <PersonCheck className='text-[#54656f] dark:text-white' size={20} />
                         </div>
                         <div className="">
                             <div ref={dropdownRef} className="relative inline-block text-left">
@@ -233,7 +233,7 @@ const UserList = () => {
                                 >
                                     Cancel
                                 </button>
-                                <button
+                                <button tabIndex='1'
                                     className="px-4 py-2 bg-slate-600 ease-linear duration-200 dark:bg-slate-900 text-white rounded hover:bg-slate-700"
                                     onClick={logoutHandler}
                                 >
