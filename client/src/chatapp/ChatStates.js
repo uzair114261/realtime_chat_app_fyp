@@ -19,6 +19,7 @@ export const ChatStatesProvider = ({ children }) => {
   const [videoCall , setVideoCall] = useState(false);
   const [callAccepted , setCallAccepted] = useState(false);
   const [incomingCall , setIncomingCall] = useState(false);
+  const [callHistory, setCallHistory] = useState(false);
   const handleUserSelect = (user) => {
     setSelectedUser(user);
   };
@@ -169,7 +170,6 @@ export const ChatStatesProvider = ({ children }) => {
   });
   const callEnd =useCallback( async (to) => {
       if(incomingCall){
-        
         socket.emit("call:end" , { room : selectedUser?.email , to : to})
       } else {
        
@@ -220,7 +220,8 @@ export const ChatStatesProvider = ({ children }) => {
     setUsers,
     acceptCall,
     incomingCall,
-    callEnd
+    callEnd,
+    callHistory, setCallHistory
   };
   return (
     <ChatStates.Provider value={contextValue}>{children}</ChatStates.Provider>

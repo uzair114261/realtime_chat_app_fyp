@@ -1,41 +1,52 @@
-import React, { useEffect, useCallback, useState, useContext, useMemo } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useContext,
+  useMemo,
+} from "react";
 import ReactPlayer from "react-player";
-import { TelephoneFill } from 'react-bootstrap-icons'
+import { TelephoneFill, Mic, MicMute } from "react-bootstrap-icons";
 import peer from "./peer";
 import { useSocket } from "../provider/SocketProvider";
 import { ChatStates } from "./ChatStates";
-
 
 const VideoCall = () => {
   const socket = useSocket();
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const { callAccepted, setCallAccepted, acceptCall, incomingCall, callEnd, selectedUser } = useContext(ChatStates);
+  const {
+    callAccepted,
+    setCallAccepted,
+    acceptCall,
+    incomingCall,
+    callEnd,
+    selectedUser,
+  } = useContext(ChatStates);
   const [remoteSocketId, setRemoteSocketId] = useState(null);
+  const [sound, setSound] = useState(false)
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
-  const [myStreamPosition, setMyStreamPosition] = useState({ x: 0, y: 0 });
-
   const handleUserJoined = useCallback(({ email, id }) => {
-
     setRemoteSocketId(id);
     handleCallUser(id);
-
   }, []);
 
-  const handleCallUser = useCallback(async (id) => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true,
-    });
-    const offer = await peer.getOffer();
-    socket.emit("user:call", { to: id, offer });
-    setMyStream(stream);
-  }, [remoteSocketId, socket]);
+  const handleCallUser = useCallback(
+    async (id) => {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      const offer = await peer.getOffer();
+      socket.emit("user:call", { to: id, offer });
+      setMyStream(stream);
+    },
+    [remoteSocketId, socket]
+  );
 
   const handleIncommingCall = useCallback(
     async ({ from, offer }) => {
-
       setRemoteSocketId(from);
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -45,7 +56,6 @@ const VideoCall = () => {
       console.log(`Incoming Call`, from, offer);
       const ans = await peer.getAnswer(offer);
       socket.emit("call:accepted", { to: from, ans });
-
     },
     [socket]
   );
@@ -60,9 +70,10 @@ const VideoCall = () => {
     ({ from, ans }) => {
       peer.setLocalDescription(ans);
       console.log("Call Accepted!");
-      setStartTime(Date.now());
+      const startTime = Date.now()
+      socket.emit('start-time', {startTime})
+      setStartTime(startTime);
       sendStreams();
-
     },
     [sendStreams]
   );
@@ -74,7 +85,7 @@ const VideoCall = () => {
 
   useEffect(() => {
     peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
-    return () => {
+    return () => {  
       peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
     };
   }, [handleNegoNeeded]);
@@ -94,7 +105,7 @@ const VideoCall = () => {
     if (remoteStream && incomingCall) {
       sendStreams();
     }
-  }, [remoteStream])
+  }, [remoteStream]);
   useEffect(() => {
     peer.peer.addEventListener("track", async (ev) => {
       const remoteStream = ev.streams;
@@ -111,20 +122,20 @@ const VideoCall = () => {
         setElapsedTime(elapsedSeconds);
       }, 1000);
     }
-  
+
     return () => {
-      clearInterval(timerInterval); // Clean up timer on component unmount or timer reset
+      clearInterval(timerInterval); 
     };
   }, [startTime]);
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = seconds % 60;
-  
+
     const formattedHours = String(hours).padStart(2, "0");
     const formattedMinutes = String(minutes).padStart(2, "0");
     const formattedSeconds = String(remainingSeconds).padStart(2, "0");
-  
+
     return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
   };
 
@@ -133,9 +144,11 @@ const VideoCall = () => {
     socket.on("incomming:call", handleIncommingCall);
     socket.on("call:accepted", handleCallAccepted);
 
-
     socket.on("peer:nego:needed", handleNegoNeedIncomming);
     socket.on("peer:nego:final", handleNegoNeedFinal);
+    socket.on("start-time", ({startTime})=> {
+      setStartTime(startTime)
+    });
 
     return () => {
       socket.off("user:joined", handleUserJoined);
@@ -144,6 +157,7 @@ const VideoCall = () => {
 
       socket.off("peer:nego:needed", handleNegoNeedIncomming);
       socket.off("peer:nego:final", handleNegoNeedFinal);
+      socket.off("start-time");
     };
   }, [
     socket,
@@ -153,67 +167,80 @@ const VideoCall = () => {
     handleNegoNeedIncomming,
     handleNegoNeedFinal,
   ]);
+  
 
   return (
-    <div className="">
-      <div className="bg-gray-500 h-screen flex flex-col justify-center items-center">
-        {/* Top section with user info and call buttons */}
-        <div className="bg-green-100 z-50 p-3 rounded-lg flex items-center justify-between w-[320px] md:w-[500px] absolute top-0 left-0 right-0 mx-auto">
-          <div className="flex items-center gap-4">
-            <img
-              className="avatar"
-              src={`${process.env.REACT_APP_BACKEND_URL}${selectedUser.profileImage}`}
-              alt="Receiver Profile"
-            />
-            <div>
-            <p className="">{selectedUser.firstName} {selectedUser.lastName}</p>
-            <p>{formatTime(elapsedTime)}</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            {!callAccepted && <button onClick={acceptCall} className="h-[50px] w-[50px] flex items-center justify-center bg-green-500 rounded-full border-none"><TelephoneFill color="white" /></button>}
-            <button onClick={() => { callEnd(selectedUser?.email) }} className="h-[50px] w-[50px] flex items-center justify-center bg-red-500 rounded-full border-none"><TelephoneFill color="white" className="rotate-[135deg]" /></button>
+    <div className="bg-green-300 h-screen w-screen">
+      {/* Top section with user info and call buttons */}
+
+      <div className="bg-green-100 fixed top-[10px] left-[50%] translate-x-[-50%] z-[100]  p-3 rounded-lg flex items-center justify-between w-[320px] md:w-[500px] mx-auto">
+        <div className="flex items-center gap-4">
+          <img
+            className="avatar"
+            src={`${process.env.REACT_APP_BACKEND_URL}${selectedUser.profileImage}`}
+            alt="Receiver Profile"
+          />
+          <div>
+            <p className="">
+              {selectedUser.firstName} {selectedUser.lastName}
+            </p>
+            {(remoteStream && myStream )&& <p>{formatTime(elapsedTime)}</p>}
           </div>
         </div>
-
-        {/* Remote stream in full size */}
-        {remoteStream && (
-          <div className="fixed top-20 left-0 right-0 flex items-center justify-center">
-            {/* <h1 className="text-white">Remote Stream</h1> */}
-            <ReactPlayer
-              className='rounded-lg'
-              playing
-              muted
-              height="100%"
-              // width="100%"
-              url={remoteStream}
-            />
-          </div>
-        )}
-
-        {/* My stream at bottom right corner */}
-        {myStream && (
-          <div
-            className="fixed bottom-0 right-0 flex items-center justify-center bg-black mx-2 mb-4"
-            style={{
-              width: "300px",
-              // height: "300px",
-
+        <div className="flex gap-3">
+          {
+            (remoteStream && myStream) && (
+          <button className="h-[50px] w-[50px] flex items-center justify-center bg-green-500 rounded-full border-none" onClick={()=> setSound(!sound)}>
+            {sound ? <Mic color="#fff" size={20}/> : <MicMute color="#fff" size={20}/>}        
+          </button>
+            )
+          } 
+          {!callAccepted && (
+            <button
+              onClick={acceptCall}
+              className="h-[50px] w-[50px] flex items-center justify-center bg-green-500 rounded-full border-none"
+            >
+              <TelephoneFill color="white" />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              callEnd(selectedUser?.email);
             }}
+            className="h-[50px] w-[50px] flex items-center justify-center bg-red-500 rounded-full border-none"
           >
-            {/* <h1 className="text-white">My Stream</h1> */}
-            <ReactPlayer
-              playing
-              muted
-              height="100%"
-              width="100%"
-              url={myStream}
-            />
-          </div>
-        )}
+            <TelephoneFill color="white" className="rotate-[135deg]" />
+          </button>
+        </div>
       </div>
-    </div>
 
+      {/* Remote stream in full size */}
+      {remoteStream && (
+        <div className="block fixed top-0 right-0 left-0 w-screen h-screen">
+          <ReactPlayer muted={sound} playing height="100%" width="100%" url={remoteStream} />
+        </div>
+      )}
+
+      {/* My stream at bottom right corner */}
+      {myStream && (
+        <div
+          className="block bottom-0 fixed rounded-lg right-0 items-center justify-center bg-black mx-2 mb-4"
+          style={{
+            width: "300px",
+            height: "300px",
+          }}
+        >
+          {/* <h1 className="text-white">My Stream</h1> */}
+          <ReactPlayer
+            playing
+            muted={sound}
+            height="100%"
+            width="100%"
+            url={myStream}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

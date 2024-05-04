@@ -2,18 +2,19 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useOnlineStatus } from '../CustomHooks/useOnlineStatus';
 import axios from 'axios';
 import AllUsers from './AllUsers';
-import { ThreeDotsVertical, PersonBadgeFill, Search, WifiOff, PersonExclamation, PersonGear, PersonCheck } from 'react-bootstrap-icons'
+import { ThreeDotsVertical, TelephoneFill, Search, WifiOff, PersonExclamation, PersonGear, PersonCheck, Phone } from 'react-bootstrap-icons'
 import SenderProfile from './SenderProfile';
 import useClickOutside from '../CustomHooks/useClickOutside';
 import { useNavigate } from 'react-router-dom';
 import { ToastContext } from '../App';
 import { ChatStates } from './ChatStates';
 import DarkModeToggle from '../CustomHooks/DarkModeToggle';
+import CallHistory from './CallHistory';
 
 
 const UserList = () => {
     const navigate = useNavigate()
-    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers, messages ,users , setUsers} = useContext(ChatStates)
+    const { userData, chatOpen, setChatOpen, handleUserSelect, senderProfile, setSenderProfile, allUsers, setAllUsers, messages ,users , setUsers, callHistory, setCallHistory} = useContext(ChatStates)
     const showToast = useContext(ToastContext)
   
     const [loggedInUser, setLoggedInUser] = useState(null);
@@ -129,18 +130,22 @@ const UserList = () => {
     }
     return (
         <>
+            <CallHistory/>
             <SenderProfile />
             <AllUsers />
-            <div className={`md:w-[30%] max-h-[100vh] h-[100vh] sm:dark:border-r-[1px] dark:border-r-white dark:bg-slate-900 overflow-auto ${chatOpen && 'max-md:hidden'} ${senderProfile && 'hidden'} ${allUsers && 'hidden'}`}>
+            <div className={`md:w-[30%] max-h-[100vh] h-[100vh] sm:dark:border-r-[1px] dark:border-r-white dark:bg-slate-900 overflow-auto ${chatOpen && 'max-md:hidden'} ${senderProfile && 'hidden'} ${allUsers && 'hidden'} ${callHistory && 'hidden'}`}>
                 <div className="flex h-[60px] justify-between items-center px-3 dark:bg-slate-900 bg-[#f0f2f5]  border-r-[#d1d7db] border-solid border-r-[1px] dark:border-none">
                     <div className="profile-image cursor-pointer" onClick={() => setSenderProfile(true)}>
                         <img src={`${process.env.REACT_APP_BACKEND_URL}${userData.profileImage}`} alt="My Profile" className='avatar' />
                     </div>
                     <div className="user-features flex">
-                        <div className='mx-2'>
+                        <div className="mx-2 cursor-pointer" onClick={() => setCallHistory(true)}>
+                            <TelephoneFill size={20} className='text-[#54656f] dark:text-white' />
+                        </div>
+                        <div className='mx-2 cursor-pointer'>
                             <DarkModeToggle />
                         </div>
-                        <div className='mx-2' onClick={() => setAllUsers(true)}>
+                        <div className='mx-2 cursor-pointer' onClick={() => setAllUsers(true)}>
                             <PersonCheck className='text-[#54656f] dark:text-white' size={20} />
                         </div>
                         <div className="">

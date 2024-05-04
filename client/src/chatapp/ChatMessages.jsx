@@ -308,7 +308,7 @@ const ChatMessages = () => {
                           <video
                             src={URL.createObjectURL(singleFile)}
                             controls
-                            className="w-[400px] w-[500px] "
+                            className="w-[500px] "
                           />
                         )}
                         {!singleFile.type.includes("video") &&

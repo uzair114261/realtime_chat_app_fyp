@@ -6,6 +6,7 @@ import { ToastContext } from "../App";
 import { ChatStates } from "./ChatStates";
 import { useSocket } from "../provider/SocketProvider";
 import VideoCall from "./videoCall";
+import AudioCall from "./AudioCall";
 
 const ChatApp = () => {
   const { userData, audioCall, videoCall } = useContext(ChatStates);
@@ -38,16 +39,16 @@ const ChatApp = () => {
   }
 
   return (
-    <div className="flex max-md:flex-col">
-      {audioCall && <>Audio Call</>}
+    <>
+      {audioCall && <AudioCall/>}
       {videoCall && <VideoCall />}
       {!audioCall && !videoCall && (
-        <>
+        <div className="flex max-md:flex-col">
           <UserList />
           <ChatMessages />
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 
