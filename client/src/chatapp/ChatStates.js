@@ -15,11 +15,13 @@ export const ChatStatesProvider = ({ children }) => {
   const [allUsers, setAllUsers] = useState(false);
   const [sendTextMessage, setSendTextMessage] = useState("");
   const [file, setFile] = useState([]);
+  const [audioFile, setAudioFile] = useState([]);
   const [audioCall , setAudioCall] = useState(false);
   const [videoCall , setVideoCall] = useState(false);
   const [callAccepted , setCallAccepted] = useState(false);
   const [incomingCall , setIncomingCall] = useState(false);
   const [callHistory, setCallHistory] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
   const handleUserSelect = (user) => {
     setSelectedUser(user);
   };
@@ -101,41 +103,82 @@ export const ChatStatesProvider = ({ children }) => {
         
         setMessages( messagesnew);
       } else {
-        const formData = new FormData();
-        formData.append("sender", sender);
-        formData.append("receiver", receiver);
-        formData.append("content", sendTextMessage);
-
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
-          {
-            method: "POST",
-            body: formData, // Send the FormData directly, no need for JSON.stringify
+        if (audioFile.length > 0) {
+          let messagesnew = messages;
+          for (var indexFile = 0; indexFile < audioFile.length; indexFile++) {
+            const formData = new FormData();
+            formData.append("sender", sender);
+            formData.append("receiver", receiver);
+            formData.append("content", sendTextMessage);
+  
+            formData.append("file", audioFile[indexFile]);
+            formData.append("content_type", audioFile[indexFile].type);
+            const response = await fetch(
+              `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
+              {
+                method: "POST",
+                body: formData, // Send the FormData directly, no need for JSON.stringify
+              }
+            );
+            if (!response.ok) {
+              setMessages(messages.filter((item) => item.id != -1));
+              throw new Error("Failed to send message");
+            }
+            if(response.ok){
+              
+              setMessages(messages.filter((item) => item.id != -1));
+              const responseJson = await response.json();
+              messagesnew.push(responseJson);
+              socket.emit("message:send", {
+                receiver: selectedUser?.email,
+                sender: userData.email,
+                message: responseJson,
+              });
+              
+            }
           }
-        );
+          
+          setMessages( messagesnew);
+        } else {
+          const formData = new FormData();
+          formData.append("sender", sender);
+          formData.append("receiver", receiver);
+          formData.append("content", sendTextMessage);
+  
+          const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
+            {
+              method: "POST",
+              body: formData, // Send the FormData directly, no need for JSON.stringify
+            }
+          );
+          
+          if (!response.ok) {
+            setMessages(messages.filter((item) => item.id != -1));
+            throw new Error("Failed to send message");
+          }
+          if(response.ok){
+            
+            setMessages(messages.filter((item) => item.id != -1));
+            const responseJson = await response.json();
+            
+            setMessages([...messages, responseJson]);
+            socket.emit("message:send", {
+              receiver: selectedUser?.email,
+              sender: userData.email,
+              message: responseJson,
+            });
+          }
+        }
         
-        if (!response.ok) {
-          setMessages(messages.filter((item) => item.id != -1));
-          throw new Error("Failed to send message");
-        }
-        if(response.ok){
-          
-          setMessages(messages.filter((item) => item.id != -1));
-          const responseJson = await response.json();
-          
-          setMessages([...messages, responseJson]);
-          socket.emit("message:send", {
-            receiver: selectedUser?.email,
-            sender: userData.email,
-            message: responseJson,
-          });
-        }
       }
       
 
     
       
       setFile([]);
+      setAudioFile([]);
+      setAudioBlob(null)
     } catch (error) {
       console.error("Error in sending the message:", error);
     }
@@ -157,17 +200,15 @@ export const ChatStatesProvider = ({ children }) => {
 
   };
   const genrateAudioCall = async () => {
-    
+     socket.emit("room:join" , {email : userData?.email , room : userData?.email});
+    socket.emit("call:incoming" , {from : userData?.email , to : selectedUser?.email , callType : "audio"});
+
   };
   const acceptCall = async () => {
     setCallAccepted(true);
     socket.emit("room:join" , {email : userData?.email , room : selectedUser?.email})
   }
-  socket.on("call:cancelled", () => {
-    setCallAccepted(false);
-    setVideoCall(false);
-    setAudioCall(false);
-  });
+  
   const callEnd =useCallback( async (to) => {
       if(incomingCall){
         socket.emit("call:end" , { room : selectedUser?.email , to : to})
@@ -178,6 +219,7 @@ export const ChatStatesProvider = ({ children }) => {
       setCallAccepted(false);
       setVideoCall(false);
       setAudioCall(false);
+      
   } , [incomingCall])
   socket.on("call:incoming" , async (data) => {
     const {from , to , callType} = data;
@@ -189,6 +231,13 @@ export const ChatStatesProvider = ({ children }) => {
       }
       setVideoCall(true);
     } 
+    else {
+      const user = users.filter((singleUser) => singleUser.email == from)?.[0];
+      if(user){
+        handleUserSelect(user);
+      }
+      setAudioCall(true);
+    }
   })
   const contextValue = {
     receiverInfo,
@@ -221,6 +270,9 @@ export const ChatStatesProvider = ({ children }) => {
     acceptCall,
     incomingCall,
     callEnd,
+    setAudioFile,
+    audioBlob,
+    setAudioBlob,
     callHistory, setCallHistory
   };
   return (

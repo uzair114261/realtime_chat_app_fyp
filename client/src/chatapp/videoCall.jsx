@@ -24,7 +24,7 @@ const VideoCall = () => {
     selectedUser,
   } = useContext(ChatStates);
   const [remoteSocketId, setRemoteSocketId] = useState(null);
-  const [sound, setSound] = useState(false)
+  const [sound, setSound] = useState(true)
   const [myStream, setMyStream] = useState();
   const [remoteStream, setRemoteStream] = useState();
   const handleUserJoined = useCallback(({ email, id }) => {
@@ -167,6 +167,18 @@ const VideoCall = () => {
     handleNegoNeedIncomming,
     handleNegoNeedFinal,
   ]);
+  socket.on("call:cancelled", () => {
+    if (myStream) {
+      myStream.getTracks().forEach(track => track.stop());
+      setMyStream(null);
+    }
+    if (remoteStream) {
+      remoteStream.getTracks().forEach(track => track.stop());
+      setRemoteStream(null);
+    }
+    setCallAccepted(false);
+   
+  });
   
 
   return (
@@ -205,6 +217,14 @@ const VideoCall = () => {
           )}
           <button
             onClick={() => {
+              if (myStream) {
+                myStream.getTracks().forEach(track => track.stop());
+                setMyStream(null);
+              }
+              if (remoteStream) {
+                remoteStream.getTracks().forEach(track => track.stop());
+                setRemoteStream(null);
+              }
               callEnd(selectedUser?.email);
             }}
             className="h-[50px] w-[50px] flex items-center justify-center bg-red-500 rounded-full border-none"
@@ -217,7 +237,7 @@ const VideoCall = () => {
       {/* Remote stream in full size */}
       {remoteStream && (
         <div className="block fixed top-0 right-0 left-0 w-screen h-screen">
-          <ReactPlayer muted={sound} playing height="100%" width="100%" url={remoteStream} />
+          <audio muted={!sound} playing height="100%" width="100%" className="video-call-video" url={remoteStream} />
         </div>
       )}
 
@@ -231,9 +251,9 @@ const VideoCall = () => {
           }}
         >
           {/* <h1 className="text-white">My Stream</h1> */}
-          <ReactPlayer
+          <audio
             playing
-            muted={sound}
+            muted
             height="100%"
             width="100%"
             url={myStream}

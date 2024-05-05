@@ -12,11 +12,14 @@ import {
   Files,
   LockFill,
   FilePdf,
+  MicMute,
+  MicMuteFill,
 } from "react-bootstrap-icons";
 import ReceiverProfile from "./ReceiverProfile";
 import useClickOutside from "../CustomHooks/useClickOutside";
 import { ChatStates } from "./ChatStates";
 import { useSocket } from "../provider/SocketProvider";
+import VoiceMessage from "./VoiceMessage";
 
 const ChatMessages = () => {
   const {
@@ -36,7 +39,10 @@ const ChatMessages = () => {
     setVideoCall,
     setCallAccepted,
     genrateAudioCall,
-    genrateVideoCall
+    genrateVideoCall,
+    setAudioFile,
+    audioBlob,
+    setAudioBlob
   } = useContext(ChatStates);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInputBox, setShowInputBox] = useState(false);
@@ -45,6 +51,43 @@ const ChatMessages = () => {
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [recording, setRecording] = useState(false);
+  
+  const mediaRecorderRef = useRef(null);
+
+  const startRecording = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+  
+      const chunks = [];
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+  
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: "audio/wav" });
+        setAudioBlob(blob);
+        const audioBlobFile = new File([blob], 'audio.wav', { type: 'audio/wav' });
+        setAudioFile([audioBlobFile]); // Remove the square brackets around audioBlobFile
+      };
+  
+      mediaRecorder.start();
+      setRecording(true);
+    })
+    .catch((error) => console.error("Error accessing microphone:", error));
+  };
+
+  const stopRecording = () => {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state === "recording"
+    ) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      setRecording(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFile([...file, e.target.files[0]]);
@@ -124,21 +167,29 @@ const ChatMessages = () => {
                 </div>
               </div>
               <div className="flex gap-5 items-center">
-                <button className="" id="audioCall" onClick={() => {
-                  genrateAudioCall();
-                  setAudioCall(true);
-                  setCallAccepted(true);
-                }}>
+                <button
+                  className=""
+                  id="audioCall"
+                  onClick={() => {
+                    genrateAudioCall();
+                    setAudioCall(true);
+                    setCallAccepted(true);
+                  }}
+                >
                   <TelephoneFill
                     className="text-[#54656f] dark:text-white"
                     size={20}
                   />
                 </button>
-                <button className="" id="videoCall" onClick={() => {
+                <button
+                  className=""
+                  id="videoCall"
+                  onClick={() => {
                     genrateVideoCall();
-                  setVideoCall(true);
-                  setCallAccepted(true);
-                }}>
+                    setVideoCall(true);
+                    setCallAccepted(true);
+                  }}
+                >
                   <CameraVideoFill
                     className="text-[#54656f] dark:text-white"
                     size={20}
@@ -252,39 +303,71 @@ const ChatMessages = () => {
                           </div>
                         ) : (
                           <>
-                            {!message.content_type.includes("image") &&
-                            !message.content_type.includes("video") && !message.content_type.includes("text") ? (
+                            {message.content_type.includes("audio") ? (
                               <>
-                              <a
-                                target="_blank"
-                                href={`${process.env.REACT_APP_BACKEND_URL}${message.file}`}
-                                className="bg-white p-3 flex flex-col gap-y-3 rounded-lg justify-center text-center"
-                              >
-                                <FilePdf className="text-7xl text-red-600 text-center mx-auto" />
-                                <div className="truncate max-w-[150px]">
-                                  {message.file?.replace(
-                                    "/media/messages/",
-                                    ""
-                                  )}
+                                <div
+                                  className={`max-w-[400px]  bg-[${
+                                    message.sender === userData.id
+                                      ? "#D9FDD3"
+                                      : "#fff"
+                                  }] dark:bg-[${
+                                    message.sender === userData.id
+                                      ? "slate-600"
+                                      : "slate-600"
+                                  }]`}
+                                >
+                                  <VoiceMessage
+                                    className="w-full min-w-[400px]"
+                                    url={`${process.env.REACT_APP_BACKEND_URL}${message.file}`}
+                                    
+                                  />
+                                  
                                 </div>
-                              </a> <div className="flex justify-between items-center h-[20px]">
-                              <div className="max-w-[180px] mt-1">
-                                {message.content}
-                              </div>
-                              <div className="max-w-[70px] text-gray-500 text-[10px] flex items-end">
-                                {message.time}
-                              </div>
-                            </div>
                               </>
                             ) : (
-                              <div className="max-w-[250px] min-w-[220px] flex">
-                                <div className="max-w-[180px] min-w-[150px] dark:text-white ">
-                                  {message.content}
-                                </div>
-                                <div className="max-w-[70px] min-w-[70px] text-gray-500 text-xs flex justify-end items-end dark:text-white">
-                                  {messageTime(message.timestamp)}
-                                </div>
-                              </div>
+                              <>
+                                
+                                <>
+                                  {!message.content_type.includes("image") &&
+                                  !message.content_type.includes("video") &&
+                                  !message.content_type.includes("text") &&
+                                  !message.content_type.includes("audio") ? (
+                                    <>
+                                      <a
+                                        target="_blank"
+                                        href={`${process.env.REACT_APP_BACKEND_URL}${message.file}`}
+                                        className="bg-white p-3 flex flex-col gap-y-3 rounded-lg justify-center text-center"
+                                      >
+                                        <FilePdf className="text-7xl text-red-600 text-center mx-auto" />
+                                        <div className="truncate max-w-[150px]">
+                                          {message.file?.replace(
+                                            "/media/messages/",
+                                            ""
+                                          )}
+                                        </div>
+                                      </a>{" "}
+                                      <div className="flex justify-between items-center h-[20px]">
+                                        <div className="max-w-[180px] mt-1">
+                                          {message.content}
+                                        </div>
+                                        <div className="max-w-[70px] text-gray-500 text-[10px] flex items-end">
+                                          {message.time}
+                                        </div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="max-w-[250px] min-w-[220px] flex">
+                                      <div className="max-w-[180px] min-w-[150px] dark:text-white ">
+                                        {message.content}
+                                      </div>
+                                      <div className="max-w-[70px] min-w-[70px] text-gray-500 text-xs flex justify-end items-end dark:text-white">
+                                        {messageTime(message.timestamp)}
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                                
+                              </>
                             )}
                           </>
                         )}
@@ -543,7 +626,18 @@ const ChatMessages = () => {
                 />
                 <div className="send flex-none px-2">
                   <div className="flex">
-                    {sendTextMessage.length > 0 ? (
+                   
+                      <div className={audioBlob ? '' : 'hidden'}>
+                       
+                        <VoiceMessage
+                                    className="w-full min-w-[400px]"
+                                    url={audioBlob ? URL.createObjectURL(audioBlob) : ''}
+                                    
+                                  />
+                       
+                      </div>
+                   
+                    {sendTextMessage.length > 0 || audioBlob ? (
                       <button
                         onClick={sendButton}
                         className="rotate-45 text-xl h-[30px] w-[30px]"
@@ -551,12 +645,25 @@ const ChatMessages = () => {
                         <SendFill size={30} color="#54656f" />
                       </button>
                     ) : (
-                      <button
-                        type="submit"
-                        className="text-xl bg-[#008069] h-[30px] w-[30px] flex items-center justify-center rounded-[50%]"
-                      >
-                        <MicFill size={17} color="#fff" />
-                      </button>
+                      <>
+                        {recording ? (
+                          <button
+                            type="button"
+                            onClick={stopRecording}
+                            className="text-xl bg-[#008069] h-[30px] w-[30px] flex items-center justify-center rounded-[50%]"
+                          >
+                            <MicMuteFill size={17} color="#fff" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={startRecording}
+                            className="text-xl bg-[#008069] h-[30px] w-[30px] flex items-center justify-center rounded-[50%]"
+                          >
+                            <MicFill size={17} color="#fff" />
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

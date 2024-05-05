@@ -261,3 +261,9 @@ body{
 }
 
 @keyframes s7 {to{transform: rotate(.5turn)}}
+
+
+.video-call-video video {
+  object-fit: cover;
+}
+
