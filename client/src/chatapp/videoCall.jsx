@@ -237,7 +237,7 @@ const VideoCall = () => {
       {/* Remote stream in full size */}
       {remoteStream && (
         <div className="block fixed top-0 right-0 left-0 w-screen h-screen">
-          <audio muted={!sound} playing height="100%" width="100%" className="video-call-video" url={remoteStream} />
+          <ReactPlayer muted={!sound} playing height="100%" width="100%" className="video-call-video" url={remoteStream} />
         </div>
       )}
 
@@ -251,7 +251,7 @@ const VideoCall = () => {
           }}
         >
           {/* <h1 className="text-white">My Stream</h1> */}
-          <audio
+          <ReactPlayer
             playing
             muted
             height="100%"
