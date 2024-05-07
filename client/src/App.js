@@ -4,33 +4,28 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Testing from "./pages/Testing";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastProvider } from "./CustomHooks/ToastContext";
 import ChatApp from "./chatapp/ChatApp";
 import { ChatStatesProvider } from "./chatapp/ChatStates";
 import { SocketProvider } from "./provider/SocketProvider";
 
-export const ToastContext = createContext();
 
 function App() {
   return (
     <div className="">
       <SocketProvider>
-
-  
-      <ToastContainer />
-      <ToastContext.Provider value={toast}>
-        <ChatStatesProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<ChatApp />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="register" element={<Register />} />
-              <Route path="testing" element={<Testing />} />
-            </Routes>
-          </Router>
-        </ChatStatesProvider>
-      </ToastContext.Provider>
+        <ToastProvider>
+          <ChatStatesProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<ChatApp />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route path="testing" element={<Testing />} />
+              </Routes>
+            </Router>
+          </ChatStatesProvider>
+        </ToastProvider>
       </SocketProvider>
     </div>
   );

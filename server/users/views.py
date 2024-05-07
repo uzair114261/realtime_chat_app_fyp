@@ -1,11 +1,12 @@
 from rest_framework import status
 from rest_framework.response import Response
+from django.http import HttpResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.contrib.auth.hashers import make_password, check_password
 from .models import Users
-from .serializers import UsersSerializers
+from .serializers import UsersSerializers, UserUpdateSerializer
 
 class AllUsersData(APIView):
     def get(self, request):
@@ -78,3 +79,26 @@ class LoginView(APIView):
         }
 
         return Response(data, status=status.HTTP_200_OK)
+    
+class UpdateUser(APIView):
+    def post(self, request, email):
+        try:
+            user = Users.objects.get(email=email)
+        except Users.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserUpdateSerializer(instance=user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            user_data = {
+                'id': user.id,
+                'email': user.email,
+                'firstName': user.firstName,
+                'lastName': user.lastName,
+                'bio': user.bio,
+                'profileImage': user.profileImage.url if user.profileImage else None,
+                'created_at': user.created_at,
+            }
+            return Response(user_data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

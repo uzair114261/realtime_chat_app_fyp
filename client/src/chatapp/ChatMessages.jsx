@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useRef, useState } from "react";
+import React, { useCallback, useContext, useMemo, useRef, useState } from "react";
 import {
   CameraVideoFill,
   TelephoneFill,
@@ -20,6 +20,7 @@ import useClickOutside from "../CustomHooks/useClickOutside";
 import { ChatStates } from "./ChatStates";
 import { useSocket } from "../provider/SocketProvider";
 import VoiceMessage from "./VoiceMessage";
+import ImagePreview from "./ImagePreview";
 
 const ChatMessages = () => {
   const {
@@ -42,8 +43,9 @@ const ChatMessages = () => {
     genrateVideoCall,
     setAudioFile,
     audioBlob,
-    setAudioBlob
+    setAudioBlob, imageView, setImageView, imageUrl, setImageUrl
   } = useContext(ChatStates);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showInputBox, setShowInputBox] = useState(false);
   const [readMore, setReadMore] = useState(false);
@@ -123,11 +125,20 @@ const ChatMessages = () => {
   const filteredMessages = messages.filter(
     (message) =>
       (message.sender === selectedUser?.id &&
-        message.receiver === userData.id) ||
-      (message.sender === userData.id && message.receiver === selectedUser?.id)
+        message.receiver === userData?.id) ||
+      (message.sender === userData?.id && message.receiver === selectedUser?.id)
   );
+
+  
+
+  const showImagePreview = useCallback((URL) => {
+    setImageView(true)
+    setImageUrl(URL);
+  }, [imageView])
+
   return (
     <>
+      
       {selectedUser ? (
         <>
           <div
@@ -241,7 +252,7 @@ const ChatMessages = () => {
               <div className="flex flex-col mb-20">
                 {filteredMessages.map((message, index) => (
                   <div
-                    key={index}
+                    key={message.id}
                     className={` flex justify-between items-end py-1 px-2 text-sm rounded mt-1 mx-2 md:mx-4 relative ${
                       message.sender === userData.id
                         ? "self-end bg-[#D9FDD3] dark:bg-slate-700"
@@ -258,8 +269,8 @@ const ChatMessages = () => {
                             : "slate-600"
                         }]`}
                       >
-                        <img
-                          className="w-full h-[380px]"
+                        <img onClick={() => showImagePreview(`${process.env.REACT_APP_BACKEND_URL}${message.file}`)}
+                          className="w-full h-[380px] cursor-pointer"
                           src={`${process.env.REACT_APP_BACKEND_URL}${message.file}`}
                           alt=""
                         />
@@ -375,6 +386,7 @@ const ChatMessages = () => {
                     )}
                   </div>
                 ))}
+                {imageView && <ImagePreview url={imageUrl}/>}
               </div>
               {file.length > 0 && (
                 <div className="absolute bottom-[10px] max-w-xl z-40 rounded-lg w-full bg-[#f0f2f5] dark:bg-slate-950 shadow-md px-4  ">

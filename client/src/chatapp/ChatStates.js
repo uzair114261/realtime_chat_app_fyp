@@ -22,6 +22,8 @@ export const ChatStatesProvider = ({ children }) => {
   const [incomingCall , setIncomingCall] = useState(false);
   const [callHistory, setCallHistory] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [imageView, setImageView] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
   const handleUserSelect = (user) => {
     setSelectedUser(user);
   };
@@ -149,7 +151,7 @@ export const ChatStatesProvider = ({ children }) => {
             `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
             {
               method: "POST",
-              body: formData, // Send the FormData directly, no need for JSON.stringify
+              body: formData, 
             }
           );
           
@@ -273,7 +275,7 @@ export const ChatStatesProvider = ({ children }) => {
     setAudioFile,
     audioBlob,
     setAudioBlob,
-    callHistory, setCallHistory
+    callHistory, setCallHistory, imageView, setImageView,imageUrl, setImageUrl
   };
   return (
     <ChatStates.Provider value={contextValue}>{children}</ChatStates.Provider>

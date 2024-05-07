@@ -2,7 +2,6 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 
-// const httpServer = http.createServer().listen(3001, "192.168.1.198");
 const httpServer = http.createServer()
 
 const sessionsMap = {};
