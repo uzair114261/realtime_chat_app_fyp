@@ -26,6 +26,12 @@ io.on("connection", (socket) => {
         console.log(receiverId)
         io.to(receiverId).emit("message:receive", data);
     })
+    socket.on("message:delete", (data) => {
+        const { receiver, messageId } = data;
+        const receiverId = sessionsMap[receiver];
+
+        io.to(receiverId).emit("message:delete", data);
+    })
     socket.on("call:incoming", (data) => {
         const { from, to, callType } = data;
         const callTo = sessionsMap[to];

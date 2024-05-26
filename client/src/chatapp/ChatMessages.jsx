@@ -14,6 +14,7 @@ import {
   FilePdf,
   MicMute,
   MicMuteFill,
+  Trash,
 } from "react-bootstrap-icons";
 import ReceiverProfile from "./ReceiverProfile";
 import useClickOutside from "../CustomHooks/useClickOutside";
@@ -43,7 +44,8 @@ const ChatMessages = () => {
     genrateVideoCall,
     setAudioFile,
     audioBlob,
-    setAudioBlob, imageView, setImageView, imageUrl, setImageUrl
+    setAudioBlob, imageView, setImageView, imageUrl, setImageUrl,
+    deleteMessage
   } = useContext(ChatStates);
 
   const [showDropdown, setShowDropdown] = useState(false);
@@ -134,7 +136,8 @@ const ChatMessages = () => {
   const showImagePreview = useCallback((URL) => {
     setImageView(true)
     setImageUrl(URL);
-  }, [imageView])
+  }, [imageView]);
+  
 
   return (
     <>
@@ -253,12 +256,17 @@ const ChatMessages = () => {
                 {filteredMessages.map((message, index) => (
                   <div
                     key={message.id}
-                    className={` flex justify-between items-end py-1 px-2 text-sm rounded mt-1 mx-2 md:mx-4 relative ${
+                    className={` group flex justify-between items-end py-1 px-2 text-sm rounded mt-1 mx-2 md:mx-4 relative ${
                       message.sender === userData.id
                         ? "self-end bg-[#D9FDD3] dark:bg-slate-700"
                         : "self-start bg-[#ffff] dark:bg-slate-600"
                     }`}
                   >
+                    {message.sender === userData.id && (
+                      <div className="absolute -left-10 items-center   h-full ps-5 hidden group-hover:flex">
+                      <Trash className="w-5 mt-2 text-red-700 cursor-pointer" onClick={() => deleteMessage(message.id)} />
+                    </div>
+                    )}
                     {message.content_type.includes("image") ? (
                       <div
                         className={`max-w-[400px] h-[400px] bg-[${

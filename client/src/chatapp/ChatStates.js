@@ -31,6 +31,27 @@ export const ChatStatesProvider = ({ children }) => {
     sendMessage();
     setSendTextMessage("");
   };
+  const deleteMessage = async (id) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}messages/delete_messages/${id}/`
+      );
+      
+
+     
+        
+          
+        socket.emit("message:delete", {
+          receiver: selectedUser?.email,
+          messageId: id,
+        });
+        setMessages(messages.filter((message) => message.id != id));
+      
+        
+    } catch (error) {
+      console.log(error);
+    }
+  }
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -49,6 +70,10 @@ export const ChatStatesProvider = ({ children }) => {
   socket.on("message:receive", (data) => {
     const { message } = data;
     setMessages([...messages, message]);
+  });
+  socket.on("message:delete", (data) => {
+    const { messageId } = data;
+    setMessages(messages.filter((message) => message.id != messageId));
   });
   const sendMessage = async () => {
     
@@ -275,7 +300,8 @@ export const ChatStatesProvider = ({ children }) => {
     setAudioFile,
     audioBlob,
     setAudioBlob,
-    callHistory, setCallHistory, imageView, setImageView,imageUrl, setImageUrl
+    callHistory, setCallHistory, imageView, setImageView,imageUrl, setImageUrl ,
+    deleteMessage
   };
   return (
     <ChatStates.Provider value={contextValue}>{children}</ChatStates.Provider>
