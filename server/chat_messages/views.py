@@ -9,6 +9,8 @@ from .models import Message
 class AllMessages(APIView):
     def get(self, request):
         messages = Message.objects.all().order_by('timestamp')
+        for message in messages:
+            message.content = message.decrypted_content
         serializer = MessageSerializer(messages, many=True)
         return Response(serializer.data)
 
@@ -16,7 +18,12 @@ class AllMessages(APIView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            messageData = Message.objects.get(id=serializer.data['id'])
+            decrypted_content = messageData.decrypted_content
+            response_data = serializer.data
+            response_data['content'] = decrypted_content
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class DeleteMessage(APIView):

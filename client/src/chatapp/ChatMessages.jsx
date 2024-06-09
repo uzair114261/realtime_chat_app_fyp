@@ -174,9 +174,7 @@ const ChatMessages = () => {
                     <h5 className="text-md leading-4 mb-1 dark:text-white">
                       {selectedUser.firstName} {selectedUser.lastName}
                     </h5>
-                    <p className="text-xs md:text-sm leading-4 text-gray-500 dark:text-white">
-                      last seen yesterday at 455 PM
-                    </p>
+                    
                   </div>
                 </div>
               </div>

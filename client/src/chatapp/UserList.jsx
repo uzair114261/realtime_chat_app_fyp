@@ -393,9 +393,9 @@ const UserList = () => {
                   </div>
                   <div className="user-last-msg dark:text-white">
                     <p className="text-gray-600 dark:text-white">
-                      {getLastMessage(user.id).length > 40
-                        ? getLastMessage(user.id).substring(0, 40) + "..."
-                        : getLastMessage(user.id)}
+                      {getLastMessage(user.id)?.length > 40
+                        ? getLastMessage(user?.id).substring(0, 40) + "..."
+                        : getLastMessage(user?.id)}
                     </p>
                   </div>
                 </div>

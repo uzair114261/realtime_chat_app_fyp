@@ -107,7 +107,7 @@ export const ChatStatesProvider = ({ children }) => {
             `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
             {
               method: "POST",
-              body: formData, // Send the FormData directly, no need for JSON.stringify
+              body: formData, 
             }
           );
           if (!response.ok) {
