@@ -11,7 +11,9 @@ import { useToast } from "../CustomHooks/ToastContext";
 const ChatApp = () => {
   const { userData, audioCall, videoCall } = useContext(ChatStates);
   const socket = useSocket();
-  const { notifySuccess, notifyError } = useToast()
+  const { notifyError } = useToast()
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 
   useMemo(() => {
     if (userData?.email) {
@@ -26,12 +28,16 @@ const ChatApp = () => {
     const refresh = localStorage.getItem("refresh");
     const userData = localStorage.getItem("userData");
     if (access && refresh && userData) {
-      navigate("/");
+     setIsAuthenticated(true)
     } else {
       notifyError("Please log in to access this page.");
       navigate("/login");
     }
   }, [navigate, notifyError]);
+
+  if(!isAuthenticated){
+    return null;
+  }
 
   return (
     <>

@@ -7,7 +7,7 @@ const httpServer = http.createServer()
 const sessionsMap = {};
 const io = new Server(httpServer, {
     cors: {
-        origin: "*", // Replace with your frontend URL
+        origin: "*", 
         methods: ["GET", "POST"],
         allowedHeaders: ["my-custom-header"],
         credentials: true,
@@ -39,11 +39,6 @@ io.on("connection", (socket) => {
         io.to(callTo).emit("call:incoming", data);
     })
 
-
-
-
-
-
     socket.on("active:users", (otherUseremail) => {
             const { rooms } = io.sockets.adapter;
             const room = rooms.get(otherUseremail);
@@ -74,20 +69,16 @@ io.on("connection", (socket) => {
             socket.emit("full");
         }
 
-        // console.log(rooms)
     });
 
 
-
     socket.on("user:call", ({ to, offer }) => {
-
         io.to(to).emit("incomming:call", { from: socket.id, offer });
     });
 
     socket.on("call:accepted", ({ to, ans }) => {
         io.to(to).emit("call:accepted", { from: socket.id, ans });
     });
-
 
     socket.on("peer:nego:needed", ({ to, offer }) => {
         io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
@@ -112,7 +103,6 @@ io.on("connection", (socket) => {
     socket.on("disconnect", async() => {
         console.log("remove", socket.id);
         const sockets = await io.in(socket.id).fetchSockets();
-
         sockets.forEach((s) => {
             s.leave(socket.id);
         });

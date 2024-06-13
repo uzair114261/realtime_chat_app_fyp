@@ -29,6 +29,7 @@ const ChatMessages = () => {
     setReceiverInfo,
     chatOpen,
     setChatOpen,
+    handleUserSelect,
     selectedUser,
     messages,
     userData,
@@ -49,14 +50,31 @@ const ChatMessages = () => {
   } = useContext(ChatStates);
 
   const [showDropdown, setShowDropdown] = useState(false);
+  const [deleteMessagePopup, setDeleteMessagePopup] = useState(false)
+  const [delMessageId, setDelMessageId] = useState(0)
   const [showInputBox, setShowInputBox] = useState(false);
-  const [readMore, setReadMore] = useState(false);
   const dropdownRef = useRef(null);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const fileInputRef = useRef(null);
   const [recording, setRecording] = useState(false);
+
+
+  const [showCloseDropDown, setShowCloseDropdown] = useState(false)
+  const dropdownRefrence = useRef(null);
+
+  const HandlingClickOutside = () => {
+    setShowCloseDropdown(false);
+  };
+  useClickOutside(dropdownRefrence, HandlingClickOutside);
   
+
+  const deletePopHandler = (messageID) => {
+    setDeleteMessagePopup(true)
+    setDelMessageId(messageID)
+  }
+
+
   const mediaRecorderRef = useRef(null);
 
   const startRecording = () => {
@@ -131,14 +149,16 @@ const ChatMessages = () => {
       (message.sender === userData?.id && message.receiver === selectedUser?.id)
   );
 
-  
-
   const showImagePreview = useCallback((URL) => {
     setImageView(true)
     setImageUrl(URL);
   }, [imageView]);
   
-
+  const handleUserClick = () => {
+    setChatOpen(false);
+    handleUserSelect(null);
+    setShowCloseDropdown(false)
+  };
   return (
     <>
       
@@ -179,6 +199,7 @@ const ChatMessages = () => {
                 </div>
               </div>
               <div className="flex gap-5 items-center">
+               
                 <button
                   className=""
                   id="audioCall"
@@ -208,7 +229,7 @@ const ChatMessages = () => {
                   />
                 </button>
                 <button
-                  onClick={() => setShowDropdown(true)}
+                  onClick={() => setShowCloseDropdown(true)}
                   type="button"
                   className=" "
                   id="menu-button"
@@ -222,10 +243,10 @@ const ChatMessages = () => {
                 </button>
                 <div className="relative ">
                   <div
-                    ref={dropdownRef}
                     className="relative inline-block text-left"
+                    ref={dropdownRefrence}
                   >
-                    {showDropdown && (
+                    {showCloseDropDown && (
                       <div
                         className="absolute right-[20px] z-10 mt-2 w-56 origin-top-right rounded-md bg-white dark:bg-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
                         role="menu"
@@ -235,12 +256,12 @@ const ChatMessages = () => {
                       >
                         <div className="py-1" role="none">
                           <li
-                            className="hover:bg-gray-100 ease-linear duration-150 text-gray-700 block px-4 py-2 text-sm"
+                          onClick={() => handleUserClick()}
+                            className="hover:bg-gray-100 ease-linear duration-150 text-gray-700 cursor-pointer block px-4 py-2 text-sm"
                             role="menuitem"
-                            tabindex="-1"
                             id="menu-item-0"
                           >
-                            Clear Chat
+                            Close chat
                           </li>
                         </div>
                       </div>
@@ -262,7 +283,8 @@ const ChatMessages = () => {
                   >
                     {message.sender === userData.id && (
                       <div className="absolute -left-10 items-center   h-full ps-5 hidden group-hover:flex">
-                      <Trash className="w-5 mt-2 text-red-700 cursor-pointer" onClick={() => deleteMessage(message.id)} />
+                      <Trash className="w-5 mt-2 text-red-700 cursor-pointer mr-2" size={22} onClick={() => deletePopHandler(message.id)} />
+                      {/* <Trash className="w-5 mt-2 text-red-700 cursor-pointer mr-2" size={22} onClick={() => deleteMessage(message.id)} /> */}
                     </div>
                     )}
                     {message.content_type.includes("image") ? (
@@ -451,7 +473,6 @@ const ChatMessages = () => {
                               role="menu"
                               aria-orientation="vertical"
                               aria-labelledby="menu-button"
-                              tabindex="-1"
                             >
                               <div className="py-1" role="none">
                                 <li
@@ -712,6 +733,35 @@ const ChatMessages = () => {
           </div>
         </>
       )}
+
+      {
+        deleteMessagePopup && (
+          <div className="popup-container">
+            <div className="popup">
+            <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
+            <p className="mb-4">Are you sure you want to Delete this message?</p>
+            <div className="flex justify-end">
+              <button
+                className="px-4 py-2 mr-4 bg-gray-300 ease-linear duration-200 text-gray-700 dark:bg-white rounded hover:bg-gray-400"
+                onClick={() => setDeleteMessagePopup(false)}
+              >
+                Cancel
+              </button>
+              <button
+                tabIndex="1"
+                className="px-4 py-2 bg-slate-600 ease-linear duration-200 dark:bg-slate-900 text-white rounded hover:bg-slate-700"
+                onClick={() => {
+                  deleteMessage(delMessageId)
+                  setDeleteMessagePopup(false)
+                }}
+              >
+                Delete
+              </button>
+            </div>
+            </div>
+          </div>
+        )
+      }
     </>
   );
 };

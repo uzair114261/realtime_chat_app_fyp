@@ -1,7 +1,6 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { EyeFill, EyeSlashFill, LockFill } from "react-bootstrap-icons";
-import axios from "axios";
 import { useToast } from "../CustomHooks/ToastContext";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +11,12 @@ const Login = () => {
     email: "",
     password: "",
   });
+  useEffect(() => {
+    if (loginData.email === "" && loginData.password === "") {
+      document.getElementsByName("email")[0].value = "";
+      document.getElementsByName("password")[0].value = "";
+    }
+  }, [loginData]);
   const { notifySuccess, notifyError } = useToast();
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
@@ -22,35 +27,52 @@ const Login = () => {
     }
     try {
       setLoading(true);
-      const response = await axios.post(
+      const formData = new FormData();
+      formData.append('email', loginData.email);
+      formData.append('password', loginData.password);
+      const response = await fetch(
         `${process.env.REACT_APP_BACKEND_URL}users/api/login`,
-        loginData
+        {
+          method: 'POST',
+          body: formData
+        }
       );
-      const { access, refresh, user } = response.data;
-      localStorage.clear();
-      localStorage.setItem("access", access);
-      localStorage.setItem("refresh", refresh);
-      localStorage.setItem("userData", JSON.stringify(user));
-      notifySuccess("Login Successfully");
-      navigate("/");
-    } catch (err) {
-      if (err.response) {
-        if (err.response.status === 404) {
-          notifyError("user not found");
-        } else if (err.response.status === 401) {
-          notifyError("Incorrect Password!");
-        } else {
-          notifyError("Server error. Please try again later.");
+      const responseData = await response.json();
+      const { access, refresh, user } = responseData;
+  
+      if (response.ok) {
+        localStorage.clear();
+        localStorage.setItem("access", access);
+        localStorage.setItem("refresh", refresh);
+        localStorage.setItem("userData", JSON.stringify(user));
+        notifySuccess("Login Successfully");
+        navigate("/");
+        setLoginData({
+          email: "",
+          password: ""
+        });
+      } else {
+        if (responseData.error.includes('Invalid credentials')) {
+          notifyError('Invalid credentials');
+          setLoginData((prevData) => ({
+            ...prevData,
+            password: ""
+          }));
+        } else if (responseData.error.includes('User not found')) {
+          notifyError('User not found');
+          setLoginData({
+            email: "",
+            password: ""
+          });
         }
       }
+    } catch (err) {
+      notifyError('Server is down, please try again later');
     } finally {
       setLoading(false);
-      setLoginData({
-        email: "",
-        password: "",
-      });
     }
   };
+  
   const togglePassword = () => {
     setShowPassword(!showPassword);
   };

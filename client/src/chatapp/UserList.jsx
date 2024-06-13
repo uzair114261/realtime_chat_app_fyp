@@ -268,15 +268,7 @@ const UserList = () => {
             />
           </div>
           <div className="user-features flex">
-            <div
-              className="mx-2 cursor-pointer"
-              onClick={() => setCallHistory(true)}
-            >
-              <TelephoneFill
-                size={20}
-                className="text-[#54656f] dark:text-white"
-              />
-            </div>
+           
             <div className="mx-2 cursor-pointer">
               <DarkModeToggle />
             </div>

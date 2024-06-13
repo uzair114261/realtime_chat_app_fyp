@@ -1,5 +1,4 @@
 import React, { useState,useCallback, useContext, useEffect, useMemo } from "react";
-import MySelf from "../images/Me.jpeg";
 import { Mic, MicMute, Steam, TelephoneFill } from "react-bootstrap-icons";
 import { ChatStates } from "./ChatStates";
 import { useSocket } from "../provider/SocketProvider";

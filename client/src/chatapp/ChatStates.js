@@ -37,10 +37,6 @@ export const ChatStatesProvider = ({ children }) => {
         `${process.env.REACT_APP_BACKEND_URL}messages/delete_messages/${id}/`
       );
       
-
-     
-        
-          
         socket.emit("message:delete", {
           receiver: selectedUser?.email,
           messageId: id,
@@ -144,7 +140,7 @@ export const ChatStatesProvider = ({ children }) => {
               `${process.env.REACT_APP_BACKEND_URL}messages/all_messages/`,
               {
                 method: "POST",
-                body: formData, // Send the FormData directly, no need for JSON.stringify
+                body: formData,
               }
             );
             if (!response.ok) {
@@ -199,10 +195,6 @@ export const ChatStatesProvider = ({ children }) => {
         }
         
       }
-      
-
-    
-      
       setFile([]);
       setAudioFile([]);
       setAudioBlob(null)

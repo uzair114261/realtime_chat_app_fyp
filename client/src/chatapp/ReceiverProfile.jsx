@@ -66,15 +66,7 @@ function ReceiverProfile() {
             {formatedDate}
           </p>
         </div>
-        <div className="bg-white shadow-lg py-4 dark:bg-slate-900 dark:shadow-none mt-3 mb-3">
-          <li
-            className="flex items-center  px-4 py-2 text-red-500 hover:bg-slate-100 dark:hover:bg-transparent cursor-pointer ease-linear duration-100"
-            onClick={() => setDeletePopUp(true)}
-          >
-            {" "}
-            <Trash3Fill className="mr-5" /> Delete Chat
-          </li>
-        </div>
+        
       </div>
       {deletePopUp && (
         <div className="popup-container">

@@ -1,5 +1,4 @@
 from cryptography.fernet import Fernet
-import base64
 import os
 
 SECRET_KEY = os.environ.get('ENCRYPTION_KEY')
